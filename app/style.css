@@ -1,0 +1,24 @@
+@import "normalize.css";
+@import "leaflet";
+@import "./components/info";
+@import "./components/map";
+
+body {
+	background-color: #eee;
+	color: #333;
+}
+
+.container {
+	display: flex;
+	flex-direction: column;
+	max-width: 700px;
+	margin: auto;
+}
+
+.panel {
+	width: 100%;
+	min-height: 200px;
+	background-color: #fafafa;
+	margin-bottom: 10px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+}
