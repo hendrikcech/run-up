@@ -2,6 +2,7 @@ var http = require('http')
 var fs = require('fs')
 var rework = require('rework')
 var reworkNPM = require('rework-npm')
+var autoprefixer = require('autoprefixer')
 var browserify = require('browserify')
 var reactify = require('reactify')
 
@@ -25,9 +26,10 @@ function dispatchReq(url, res) {
 		res.setHeader('content-type', 'text/css')
 		var cssStr = fs.readFileSync(__dirname + '/app/style.css', { encoding: 'utf8'})
 		try {
-			res.end(rework(cssStr)
+			var css = rework(cssStr)
 				.use(reworkNPM({ dir: __dirname + '/app', shim: { 'leaflet': 'dist/leaflet.css' }}))
-				.toString())
+				.toString()
+			res.end(autoprefixer.process(css).css)
 		} catch(e) {
 			console.error(e.source, e.stack)
 			res.end()

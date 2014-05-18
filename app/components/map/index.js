@@ -14,8 +14,8 @@ module.exports = React.createClass({
 		var geoJson = L.geoJson(this.props.geoJSON).addTo(map)
 		window.g = geoJson
 		window.m = map
-		map.fitBounds(geoJson.getBounds(), map.getBoundsZoom(geoJson.getBounds(), true))
-		console.log(map.getBoundsZoom(geoJson.getBounds(), true))
+		map.fitBounds(geoJson.getBounds(),
+			map.getBoundsZoom(geoJson.getBounds(), true))
 	},
 
 	render: function() {
