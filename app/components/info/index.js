@@ -20,7 +20,7 @@ module.exports = React.createClass({
 						<img className='info__avatar-img' src={this.props.profile.avatar} />
 					</div>
 					<div className='info__list'>
-						<h1 className='info__name'>{name}</h1>
+						<h1 className='info__name'>{name+'yo'}</h1>
 						<span>{time}</span>
 					</div>
 				</div>
@@ -31,13 +31,13 @@ module.exports = React.createClass({
 					</div>
 					<div className='info__item'>
 						<span className='info__item-value'>
-							{duration.minutes() +':'+ duration.seconds()}
+							{WLZ(duration.minutes()) +':'+ WLZ(duration.seconds())}
 						</span>
 						<span className='info__item-label'>Duration</span>
 					</div>
 					<div className='info__item'>
 						<span className='info__item-value'>
-							{pace.minutes() +':'+ pace.seconds()}
+							{WLZ(pace.minutes()) +':'+ WLZ(pace.seconds())}
 						</span>
 						<span className='info__item-label'>Pace</span>
 					</div>
@@ -50,3 +50,12 @@ module.exports = React.createClass({
 		)
 	}
 })
+
+
+function WLZ(d) { // withLeadingZero
+	var str = d.toString()
+	if(str.length < 2) {
+		return '0' + str
+	}
+	return str
+}

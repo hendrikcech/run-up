@@ -30,4 +30,5 @@ var App = React.createClass({
 	}
 })
 
+React.initializeTouchEvents(true)
 React.renderComponent(<App geoJSON={run} profile={profile}/>, document.body)

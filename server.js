@@ -1,3 +1,4 @@
+var Flo = require('fb-flo')
 var http = require('http')
 var fs = require('fs')
 var rework = require('rework')
@@ -5,6 +6,54 @@ var reworkNPM = require('rework-npm')
 var autoprefixer = require('autoprefixer')
 var browserify = require('browserify')
 var reactify = require('reactify')
+
+
+var flo = Flo('./app/', {
+	port: 8888,
+	host: 'localhost',
+	verbose: false,
+	glob: ['**/*.js', '**/*.css']
+}, function(path, cb) {
+	if(path.match(/\.js$/)) {
+		cb({
+			resourceURL: 'http://localhost:8000/bundle.js',
+			content: '',
+			reload: true
+		})
+		// bundleJS(function(err, js) {
+		// 	if(err) throw err
+		// 	cb({
+		// 		resourceURL: 'http://localhost:8000/bundle.js',
+		// 		contents: js
+		// 	})
+		// })
+	} else if(path.match(/\.css$/)) {
+		console.log(path)
+		var css = bundleCSS()
+		cb({
+			resourceURL: 'http://localhost:8000/bundle.css',
+			contents: css,
+			// match: /\.css$/,
+			// reload: true
+		})
+	}
+})
+
+function bundleJS(cb) {
+	return browserify(__dirname + '/app/app.js')
+		.transform(reactify)
+		.bundle({ debug: true }, cb)
+}
+
+function bundleCSS() {
+	var cssStr = fs.readFileSync(__dirname + '/app/style.css').toString()
+	var css = rework(cssStr)
+		.use(reworkNPM({
+			dir: __dirname + '/app',
+			shim: { 'leaflet': 'dist/leaflet.css' }
+		})).toString()
+	return autoprefixer.process(css).css
+}
 
 var server = http.createServer(function(req, res) {
 	console.log(req.url)
@@ -15,23 +64,19 @@ function dispatchReq(url, res) {
 	switch(url) {
 	case '/bundle.js':
 		res.setHeader('content-type', 'application/javascript')
-		var b = browserify(__dirname + '/app/app.js').transform(reactify)
-		var s = b.bundle({ debug: true })
+		bundleJS()
 			.on('error', function(err) {
 				console.error(err)
 			})
 			.pipe(res)
 	break
-	case '/style.css':
+	case '/bundle.css':
 		res.setHeader('content-type', 'text/css')
-		var cssStr = fs.readFileSync(__dirname + '/app/style.css', { encoding: 'utf8'})
 		try {
-			var css = rework(cssStr)
-				.use(reworkNPM({ dir: __dirname + '/app', shim: { 'leaflet': 'dist/leaflet.css' }}))
-				.toString()
-			res.end(autoprefixer.process(css).css)
-		} catch(e) {
-			console.error(e.source, e.stack)
+			var css = bundleCSS()
+			res.end(css)
+		} catch(err) {
+			console.error(err.stack)
 			res.end()
 		}
 	break

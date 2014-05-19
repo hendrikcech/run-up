@@ -10,6 +10,7 @@ var moment = require('moment')
 	distance: total distance in m,
 	coordinates: raw array,
 	points: [{
+		time: time moving since start of activity in seconds,
 		hr: 152,
 		coordinates: [lon, lat, ele]
 		pace: s/km,
@@ -57,7 +58,7 @@ module.exports = function(json) {
 		} else {
 			point.moving = false
 		}
-
+		point.time = res.duration
 
 		res.points.push(point)
 	}
