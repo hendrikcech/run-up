@@ -80,6 +80,11 @@ function dispatchReq(url, res) {
 			res.end()
 		}
 	break
+	case '/highcharts.js':
+		res.setHeader('content-type', 'application/javascript')
+		fs.createReadStream(__dirname + '/app/vendor/highcharts-custom.js')
+			.pipe(res)
+	break
 	default:
 		res.setHeader('content-type', 'text/html')
 		fs.createReadStream(__dirname + '/app/index.html').pipe(res)

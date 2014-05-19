@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 var React = require('react')
-//require('d3')
+//require('highcharts')
 
 module.exports = React.createClass({
 	displayName: require('./package.json').name,
