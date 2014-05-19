@@ -10,141 +10,115 @@ module.exports = React.createClass({
 		}
 	},
 	getInitialState: function() {
-		return {
-			mousePos: null,
-			width: 700,
-			height: 300
-		}
+		return { range: 1000 }
+	},
+	getGroupedData: function() { // in meters
+		var data = this.props.data
+		var res = []
+		var currentDistance = 0
+		var hrTotal = 0
+		var hrPoints = 0
+		var i = 1
+		data.points.forEach(function(point) {
+			hrTotal += point.hr
+			hrPoints++
+			if((currentDistance += point.length) >= this.state.range) {
+				res.push([
+					Math.round(point.distance) / 1000,
+					Math.round(hrTotal / hrPoints)
+				])
+				currentDistance = hrTotal = hrPoints = 0
+				i++
+			}
+		}, this)
+		return res
 	},
 	componentDidMount: function() {
-		this.setState({ 'width': this.getDOMNode().clientWidth })
-		this.getDOMNode()
+		this.chart = new Highcharts.Chart({
+			chart: {
+				renderTo: 'graph',
+				type: 'column'
+			},
+			title: { text: '' },
+			tooltip: {
+				headerFormat: '',
+				pointFormat: '<span style="color:{series.color}"><b>{point.y}</b><br/>'
+			},
+			xAxis: {
+				title: { text: 'km' },
+				// categories: ['km']
+				// type: 'categories'
+			},
+			yAxis: {
+				title: { text: 'Heart Rate' }
+			},
+			legend: {
+				enabled: false
+			},
+			plotOptions: {
+				column: {
+					pointPadding: 0,
+					groupPadding: 0,
+					borderWidth: 1
+				}
+			},
+			series: [{ name: 'HR', data: this.getGroupedData() }]
+		})
 	},
-	onPointerMove: function(e) {
-		e.preventDefault()
-		var x = e.clientX || e.touches[0].clientX
-		this.setState({ 'mousePos': x - this.getDOMNode().offsetLeft })
-	},
-	onPointerLeave: function(e) {
-		this.setState({ 'mousePos': null })
+	onRangeChange: function(e) {
+		console.log(this.refs.range.getDOMNode().value)
+		this.setState({ range: this.refs.range.getDOMNode().value })
 	},
 
 	render: function() {
-		var tupels = this.props.data.points.map(function(point) {
-			return [point.time, point.hr]
-		})
-
-		var max = [
-			tupels[tupels.length - 1][0],
-			tupels.reduce(function(memo, val) {
-				return Math.max(memo, val[1])
-			}, 0)]
-		var min = [
-			0,
-			tupels.reduce(function(memo, val) {
-				return Math.min(memo, val[1])
-			}, max[1])]
-		var size = [this.state.width / max[0], this.state.height / (max[1] - min[1])]
-		var scaleX = function(val) {
-			return val * size[0]
+		if(this.chart) {
+			this.chart.series[0].setData(this.getGroupedData())
 		}
-		var scaleY = function(val) {
-			return (max[1] - val) * size[1]
-		}
-		var xToNode = function(x) {
-			var time = x / size[0]
-			var clostestPoint = []
-			var closestVal = max[0]
-			for(var i = 1; i < tupels.length - 1; i++) {
-				var diff = Math.abs(tupels[i][0] - time)
-				if(diff < closestVal) {
-					closestVal = diff
-					clostestPoint = tupels[i]
-				} else {
-					if(Math.abs(tupels[i-1][0] - time) > closestVal) {
-						break
-					}
-				}
-			}
-			return clostestPoint
-		}
-
 		return (
 			<div className='panel graph'>
-				<svg width={this.state.width} height={this.state.height}
-					onMouseMove={this.onPointerMove}
-					onTouchMove={this.onPointerMove}
-					onTouchStart={this.onPointerMove}
-					// onMouseLeave={this.onPointerLeave}
-					// onTouchEnd={this.onPointerLeave}
-					>
-					<Select pos={this.state.mousePos} xToNode={xToNode} scaleX={scaleX} scaleY={scaleY} />
-					<Line data={tupels} scaleX={scaleX} scaleY={scaleY} />
-				</svg>
+				<div className='graph__toolbar'>
+					<Range onChange={this.onRangeChange} ref='range' className='graph__range' />
+					{this.state.range}
+				</div>
+				<div id='graph' />
 			</div>
 		)
 	}
 })
 
-var Select = React.createClass({
+var Range = React.createClass({
 	getDefaultProps: function() {
 		return {
-			pos: null,
-			color: 'black',
-			width: 20,
-			height: 8,
-			rx: 2,
-			ry: 2
+			min: 250,
+			max: 3000,
+			value: 1000,
+			onChange: function() {}
 		}
 	},
-
-	render: function() {
-		var props = this.props
-		if(!props.pos) return <g />
-		var path = 'M' + props.pos +','+ 0 +'\nL'+ props.pos +','+ props.height
-		var circlePos = this.props.xToNode(props.pos)
-
-		// <path d={path} stroke={props.color} strokeWidth={props.width} fill="none" />
-		// <circle cx={props.scaleX(circlePos[0])} cy={props.scaleY(circlePos[1])} r="6" stroke="black" fill="black" />
-		return (
-			<g>
-				<rect x={props.scaleX(circlePos[0])} y={props.scaleY(circlePos[1])} width={this.props.width} height={this.props.height} rx={this.props.rx} ry={this.props.ry} fill="black" />
-				<text x={props.scaleX(circlePos[0])} y={props.scaleY(circlePos[1])}>
-					152
-				</text>
-			</g>
-		)
-	}
-})
-
-var Line = React.createClass({
-	getDefaultProps: function() {
+	getInitialState: function() {
 		return {
-			data: [], // contains [x, y]
-			color: 'blue',
-			width: 2
+			// step: this.getStep(this.props.value),
+			step: 250,
+			value: this.props.value
 		}
 	},
-	shouldComponentUpdate: function(nextProps, nextState) {
-		return false
+	getStep: function(value) {
+		var val = value || this.refs.input.getDOMNode().value
+		var step = val
+		if(step > 1000) {
+			step = 1000
+		}
+		return step
 	},
-	onClick: function(e) {
-		console.log(e)
+	onChange: function(e) {
+		// this.setState({ step: this.getStep() })
+		this.props.onChange(e)
 	},
-
 	render: function() {
-		var scaleX = this.props.scaleX
-		var scaleY = this.props.scaleY
-		var path = this.props.data.reduce(function(memo, v, i) {
-			if(i === 0) {
-				return 'M' + scaleX(v[0]) +','+ scaleY(v[1])
-			} else {
-				return memo + '\nL' + scaleX(v[0]) +','+ scaleY(v[1])
-			}
-		}, '')
-
 		return (
-			<path d={path} stroke={this.props.color} strokeWidth={this.props.width} fill="none" />
+			<input type='range' min={this.props.min} max={this.props.max}
+				onChange={this.onChange} ref='input'
+				step={this.state.step} value={this.state.value} />
 		)
 	}
 })

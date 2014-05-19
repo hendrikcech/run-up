@@ -1,3 +1,8 @@
 .graph {
 	box-sizing: border-box;
 }
+
+.graph__toolbar {
+	height: 50px;
+	background: steelblue;
+}

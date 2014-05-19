@@ -4,9 +4,8 @@ var fs = require('fs')
 var rework = require('rework')
 var reworkNPM = require('rework-npm')
 var autoprefixer = require('autoprefixer')
-var browserify = require('browserify')
+var watchify = require('watchify')
 var reactify = require('reactify')
-
 
 var flo = Flo('./app/', {
 	port: 8888,
@@ -14,36 +13,36 @@ var flo = Flo('./app/', {
 	verbose: false,
 	glob: ['**/*.js', '**/*.css']
 }, function(path, cb) {
-	if(path.match(/\.js$/)) {
-		cb({
-			resourceURL: 'http://localhost:8000/bundle.js',
-			content: '',
-			reload: true
-		})
-		// bundleJS(function(err, js) {
-		// 	if(err) throw err
-		// 	cb({
-		// 		resourceURL: 'http://localhost:8000/bundle.js',
-		// 		contents: js
-		// 	})
-		// })
-	} else if(path.match(/\.css$/)) {
+	// if(path.match(/\.js$/)) {
+	if(path.match(/\.css$/)) {
 		console.log(path)
 		var css = bundleCSS()
 		cb({
 			resourceURL: 'http://localhost:8000/bundle.css',
-			contents: css,
-			// match: /\.css$/,
-			// reload: true
+			contents: css
 		})
 	}
 })
 
+var w = watchify(__dirname + '/app/app.js')
+	.transform(reactify)
+	.on('log', console.log)
+	.on('error', function(err) {
+		console.error(err)
+	})
+	.on('update', function() {
+		flo.server.broadcast({
+			match: 'indexOf',
+			contents: '',
+			resourceURL: 'blabla',
+			reload: true
+		})	
+	})
+
 function bundleJS(cb) {
-	return browserify(__dirname + '/app/app.js')
-		.transform(reactify)
-		.bundle({ debug: true }, cb)
+	return w.bundle({ debug: true }, cb)
 }
+bundleJS().on('data', function() {})
 
 function bundleCSS() {
 	var cssStr = fs.readFileSync(__dirname + '/app/style.css').toString()
@@ -57,18 +56,10 @@ function bundleCSS() {
 
 var server = http.createServer(function(req, res) {
 	console.log(req.url)
-	dispatchReq(req.url, res)
-})
-
-function dispatchReq(url, res) {
-	switch(url) {
+	switch(req.url) {
 	case '/bundle.js':
 		res.setHeader('content-type', 'application/javascript')
-		bundleJS()
-			.on('error', function(err) {
-				console.error(err)
-			})
-			.pipe(res)
+		bundleJS().pipe(res)
 	break
 	case '/bundle.css':
 		res.setHeader('content-type', 'text/css')
@@ -89,7 +80,7 @@ function dispatchReq(url, res) {
 		res.setHeader('content-type', 'text/html')
 		fs.createReadStream(__dirname + '/app/index.html').pipe(res)
 	}
-}
+})
 
 var port = process.env.PORT || 8000
 server.listen(port)
