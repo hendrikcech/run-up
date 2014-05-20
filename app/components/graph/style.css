@@ -5,4 +5,5 @@
 .graph__toolbar {
 	height: 50px;
 	background: steelblue;
+	display: none;
 }

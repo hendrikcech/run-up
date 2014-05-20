@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 global.React = require('react')
 
-var processGeoJSON = require('./process.js')
+var Model = require('./model.js')
 
 var Info = require('./components/info')
 var Graph = require('./components/graph')
@@ -12,10 +12,14 @@ var run = require('./run.json')
 
 var App = React.createClass({
 	getInitialState: function() {
-		return { data: processGeoJSON(this.props.geoJSON) }
+		this.model = new Model(this.props.geoJSON)
+		return {
+			data: this.model.data,
+			selected: null
+		}
 	},
 	componentWillReceiveProps: function() {
-		this.setState({ data: processGeoJSON(this.props.geoJSON) })
+		this.setState({ data: convertGeoJSON(this.props.geoJSON) })
 	},
 
 	render: function() {
@@ -23,8 +27,8 @@ var App = React.createClass({
 		return (
 			<div className='container'>
 				<Info data={this.state.data} profile={this.props.profile} />
+				<Map selected={this.state.selected} model={this.model} />
 				<Graph data={this.state.data} />
-				<Map geoJSON={this.props.geoJSON} />
 			</div>
 		)
 	}

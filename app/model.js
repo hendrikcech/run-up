@@ -16,10 +16,17 @@ var moment = require('moment')
 		coordinates: [lon, lat, ele]
 		pace: s/km,
 		moving: true if paces > 8 min/km (?),
+		length: distance of this point,
+		duration: time passed during this point
 	}]
 }*/
 
-module.exports = function(json) {
+module.exports = Model
+function Model(geoJSON) {
+	this.data = this._convertGeoJSON(geoJSON)
+}
+
+Model.prototype._convertGeoJSON = function(json) {
 	var res = {}
 
 	var hrTotal = 0
@@ -73,4 +80,20 @@ module.exports = function(json) {
 	res.distance = Math.round(res.distance)
 
 	return res
+}
+
+Model.prototype.getSegment = function(start, length) { // both in m
+	var points = []
+	this.data.points.forEach(function(point) {
+		if(point.distance < start || point.distance > start + length) return
+		points.push(point)
+	}, this)
+	return points
+}
+
+Model.prototype.getCoordinates = function(points, latlng) {
+	return points.map(function(point) {
+		if(!latlng) return point.coordinates
+		else return [point.coordinates[1], point.coordinates[0]]
+	})
 }

@@ -34,6 +34,7 @@ module.exports = React.createClass({
 		return res
 	},
 	componentDidMount: function() {
+		var self = this
 		this.chart = new Highcharts.Chart({
 			chart: {
 				renderTo: 'graph',
@@ -60,6 +61,15 @@ module.exports = React.createClass({
 					pointPadding: 0,
 					groupPadding: 0,
 					borderWidth: 1
+				},
+				series: {
+					cursor: 'pointer',
+					point: {
+						events: {
+							click: function(e) {
+								self.onColumnClick(e, this)							}
+						}
+					}
 				}
 			},
 			series: [{ name: 'HR', data: this.getGroupedData() }]
@@ -68,6 +78,10 @@ module.exports = React.createClass({
 	onRangeChange: function(e) {
 		console.log(this.refs.range.getDOMNode().value)
 		this.setState({ range: this.refs.range.getDOMNode().value })
+	},
+	onColumnClick: function(e, point) {
+		console.log(e)
+		console.log(point)
 	},
 
 	render: function() {
