@@ -12,8 +12,8 @@ module.exports = React.createClass({
 	},
 	getInitialState: function() {
 		return {
-			range: 1000,
-			chart: { series: [{ setData: function() {} }]},
+			range: 500,
+			// chart: {},
 			supportsTouch: 'ontouchstart' in window
 		}
 	},
@@ -21,7 +21,7 @@ module.exports = React.createClass({
 		var hr = this.props.model.data.hr
 		this.state.chart = new Highcharts.Chart({
 			chart: {
-				renderTo: this.getDOMNode(),
+				renderTo: 'graph',
 				type: 'column',
 				// height:
 			},
@@ -81,9 +81,8 @@ module.exports = React.createClass({
 		}
 		return res
 	},
-	onRangeChange: function(e) {
-		console.log(this.refs.range.getDOMNode().value)
-		this.setState({ range: this.refs.range.getDOMNode().value })
+	onRangeChange: function(newRange) {
+		this.setState({ range: newRange })
 	},
 	onSelectionChange: function(e, nextTick) {
 		if(!nextTick) {
@@ -104,17 +103,18 @@ module.exports = React.createClass({
 		this.props.onSelectionChange(selected) // [start, length]
 	},
 	shouldComponentUpdate: function(nextProps, nextState) {
-		// return this.props !== nextProps || this.state !== nextState
-		return false
+		return this.state.range !== nextState.range
 	},
 
 	render: function() {
-		this.state.chart.series[0].setData(this.getGroupedData(), true)
+		console.log('redraw')
+		if(this.state.chart) {
+			this.state.chart.series[0].setData(this.getGroupedData(), true, true, false)
+		}
 		return (
 			<div className='panel graph'>
 				<div className='graph__toolbar'>
-					<Range onChange={this.onRangeChange} ref='range' className='graph__range' />
-					{this.state.range}
+					<Range onChange={this.onRangeChange} value={this.state.range} />
 				</div>
 				<div id='graph' />
 			</div>
@@ -126,35 +126,31 @@ var Range = React.createClass({
 	getDefaultProps: function() {
 		return {
 			min: 250,
-			max: 3000,
+			max: 8000,
 			value: 1000,
 			onChange: function() {}
 		}
 	},
-	getInitialState: function() {
-		return {
-			// step: this.getStep(this.props.value),
-			step: 250,
-			value: this.props.value
-		}
+	onMinus: function() {
+		var props = this.props
+		var newValue = props.value / 2
+		props.onChange(newValue > props.min ? newValue : props.min)
 	},
-	getStep: function(value) {
-		var val = value || this.refs.input.getDOMNode().value
-		var step = val
-		if(step > 1000) {
-			step = 1000
-		}
-		return step
-	},
-	onChange: function(e) {
-		// this.setState({ step: this.getStep() })
-		this.props.onChange(e)
+	onPlus: function() {
+		var props = this.props
+		var newValue = props.value * 2
+		props.onChange(newValue < props.max ? newValue : props.max)
 	},
 	render: function() {
+		var props = this.props
 		return (
-			<input type='range' min={this.props.min} max={this.props.max}
-				onChange={this.onChange} ref='input'
-				step={this.state.step} value={this.state.value} />
+			<div className='graph__range'>
+				<button onClick={this.onMinus} disabled={props.value === props.min}
+					className='graph__range-button'>-</button>
+				<span className='graph__range-value'>{this.props.value}</span>
+				<button onClick={this.onPlus} disabled={props.value === props.max}
+					className='graph__range-button'>+</button>
+			</div>
 		)
 	}
 })

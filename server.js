@@ -15,12 +15,16 @@ var flo = Flo('./app/', {
 }, function(path, cb) {
 	// if(path.match(/\.js$/)) {
 	if(path.match(/\.css$/)) {
-		console.log(path)
-		var css = bundleCSS()
 		cb({
-			resourceURL: 'http://localhost:8000/bundle.css',
-			contents: css
+			resourceURL: 'css',
+			content: '',
+			reload: true
 		})
+		// var css = bundleCSS()
+		// cb({
+		// 	resourceURL: 'http://localhost:8000/bundle.css',
+		// 	contents: css
+		// })
 	}
 })
 
