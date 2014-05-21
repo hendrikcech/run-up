@@ -1,9 +1,17 @@
 .graph {
 	box-sizing: border-box;
+	height: 350px;
+	-webkit-user-select: none;
 }
 
 .graph__toolbar {
 	height: 50px;
 	background: steelblue;
 	display: none;
+}
+
+@media all and (max-width: 699px) {
+	.graph {
+		height: 200px;
+	}
 }

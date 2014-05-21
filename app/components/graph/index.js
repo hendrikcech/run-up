@@ -17,8 +17,9 @@ module.exports = React.createClass({
 		var self = this
 		this.chart = new Highcharts.Chart({
 			chart: {
-				renderTo: 'graph',
+				renderTo: this.getDOMNode(),
 				type: 'column',
+				// height:
 			},
 			title: { text: '' },
 			tooltip: {
@@ -32,13 +33,21 @@ module.exports = React.createClass({
 			},
 			plotOptions: {
 				column: {
-					pointPadding: 0,
-					groupPadding: 0,
+					pointPadding: null,
+					groupPadding: null,
 					borderWidth: 1,
+					borderColor: 'white',
 					allowPointSelect: true
 				},
 				series: {
 					cursor: 'pointer',
+					states:  {
+						select: {
+							color: 'hsl(209, 75%, 54%)',
+							borderWidth: 1,
+							borderColor: 'white'
+						}
+					},
 					point: {
 						events: {
 							click: this.onSelectionChange,
@@ -50,6 +59,8 @@ module.exports = React.createClass({
 			},
 			series: [{ name: 'HR', data: this.getGroupedData() }]
 		})
+
+		window.r = self.chart.redraw
 	},
 	/*returns [distance in km, average hr in segment]*/
 	getGroupedData: function() {
@@ -67,6 +78,7 @@ module.exports = React.createClass({
 		this.setState({ range: this.refs.range.getDOMNode().value })
 	},
 	onSelectionChange: function(e) {
+		e.preventDefault()
 		var self = this
 		process.nextTick(function() {
 			var range = self.state.range

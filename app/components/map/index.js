@@ -27,8 +27,10 @@ module.exports = React.createClass({
 		state.route.addTo(state.map)
 		state.selection.addTo(state.map)
 
+		var bounds = state.route.getBounds()
 		var zoomLevel = state.map.getBoundsZoom(state.route.getBounds(), true)
-		state.map.fitBounds(state.route.getBounds(), zoomLevel)
+		state.map.fitBounds(bounds, zoomLevel)
+		state.map.setMaxBounds(bounds)
 	},
 	selectSegment: function() {
 		var selection = this.props.selection
