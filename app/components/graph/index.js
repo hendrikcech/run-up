@@ -46,7 +46,8 @@ module.exports = React.createClass({
 					groupPadding: null,
 					borderWidth: 1,
 					borderColor: 'white',
-					allowPointSelect: true
+					allowPointSelect: true,
+					pointPlacement: 'between'
 				},
 				series: {
 					cursor: 'pointer',
