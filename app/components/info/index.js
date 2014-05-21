@@ -10,9 +10,9 @@ module.exports = React.createClass({
 		var data = this.props.data
 		var name = data.name || 'Random Run'
 		var time = moment(data.time).calendar()
-		var duration = moment.duration(data.duration, 'seconds')
+		var duration = moment.duration(data.duration, 'milliseconds')
 		var distance = Math.round(data.distance / 1000 * 100) / 100
-		var pace = moment.duration(data.pace, 'seconds')
+		var pace = moment.duration(data.pace.avg, 'seconds')
 		return (
 			<div className='info panel'>
 				<div className='info__top'>
@@ -20,7 +20,7 @@ module.exports = React.createClass({
 						<img className='info__avatar-img' src={this.props.profile.avatar} />
 					</div>
 					<div className='info__list'>
-						<h1 className='info__name'>{name+'yo'}</h1>
+						<h1 className='info__name'>{name}</h1>
 						<span>{time}</span>
 					</div>
 				</div>
@@ -42,7 +42,7 @@ module.exports = React.createClass({
 						<span className='info__item-label'>Pace</span>
 					</div>
 					<div className='info__item'>
-						<span className='info__item-value'>{data.hr}</span>
+						<span className='info__item-value'>{data.hr.avg}</span>
 						<span className='info__item-label'>Heart Rate</span>
 					</div>
 				</div>

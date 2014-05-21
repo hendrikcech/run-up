@@ -11,11 +11,15 @@ module.exports = React.createClass({
 		}
 	},
 	getInitialState: function() {
-		return { range: 1000 }
+		return {
+			range: 1000,
+			chart: { series: [{ setData: function() {} }]},
+			supportsTouch: 'ontouchstart' in window
+		}
 	},
 	componentDidMount: function() {
-		var self = this
-		this.chart = new Highcharts.Chart({
+		var hr = this.props.model.data.hr
+		this.state.chart = new Highcharts.Chart({
 			chart: {
 				renderTo: this.getDOMNode(),
 				type: 'column',
@@ -24,10 +28,15 @@ module.exports = React.createClass({
 			title: { text: '' },
 			tooltip: {
 				headerFormat: '',
-				pointFormat: '<span style="color:{series.color}"><b>{point.y}</b><br/>'
+				pointFormat: '<span style="color:{series.color}"><b>{point.y}</b><br/>',
+				animation: false
 			},
 			xAxis: {},
-			yAxis: { title: { text: 'Heart Rate' } },
+			yAxis: {
+				title: { text: 'Heart Rate' },
+				floor: hr.avg - 20, ceiling: hr.avg + 15,
+				min: hr.min, max: hr.max
+			},
 			legend: {
 				enabled: false
 			},
@@ -59,8 +68,6 @@ module.exports = React.createClass({
 			},
 			series: [{ name: 'HR', data: this.getGroupedData() }]
 		})
-
-		window.r = self.chart.redraw
 	},
 	/*returns [distance in km, average hr in segment]*/
 	getGroupedData: function() {
@@ -77,19 +84,23 @@ module.exports = React.createClass({
 		console.log(this.refs.range.getDOMNode().value)
 		this.setState({ range: this.refs.range.getDOMNode().value })
 	},
-	onSelectionChange: function(e) {
-		e.preventDefault()
-		var self = this
-		process.nextTick(function() {
-			var range = self.state.range
-			var selected = self.chart.getSelectedPoints().map(function(point) {
-				return [point.x, range]
-			})
-			if(e.type === 'mouseOver') {
-				selected.push([e.target.x, range])
+	onSelectionChange: function(e, nextTick) {
+		if(!nextTick) {
+			return process.nextTick(this.onSelectionChange.bind(null, e, true))
+		}
+
+		var selected = this.state.chart.getSelectedPoints().map(function(point) {
+			return [point.x, this.state.range]
+		}, this)
+
+		if(e.type === 'mouseOver') {
+			if(this.state.supportsTouch) { // touch screen?
+				var selected = []
 			}
-			self.props.onSelectionChange(selected) // [start, length]
-		})
+			selected.push([e.target.x, this.state.range])
+		}
+
+		this.props.onSelectionChange(selected) // [start, length]
 	},
 	shouldComponentUpdate: function(nextProps, nextState) {
 		// return this.props !== nextProps || this.state !== nextState
@@ -97,12 +108,7 @@ module.exports = React.createClass({
 	},
 
 	render: function() {
-		if(this.chart) {
-			var d = this.getGroupedData()
-			// this.chart.series[0].setData(d, true)
-			this.chart.series[0].data = d
-			this.chart.redraw()
-		}
+		this.state.chart.series[0].setData(this.getGroupedData(), true)
 		return (
 			<div className='panel graph'>
 				<div className='graph__toolbar'>
