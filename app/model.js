@@ -82,7 +82,9 @@ Model.prototype._convertGeoJSON = function(json) {
 	return res
 }
 
-Model.prototype.getSegment = function(start, length) { // both in m
+Model.prototype.getSegment = function(boundaries) { // both in m
+	var start = boundaries[0]
+	var length = boundaries[1]
 	var points = []
 	this.data.points.forEach(function(point) {
 		if(point.distance < start || point.distance > start + length) return
@@ -91,9 +93,16 @@ Model.prototype.getSegment = function(start, length) { // both in m
 	return points
 }
 
+Model.prototype.getHR = function(points) {
+	var total = points.reduce(function(memo, point) {
+		return memo + point.hr
+	}, 0)
+	return Math.round(total / points.length)
+}
+
 Model.prototype.getCoordinates = function(points, latlng) {
 	return points.map(function(point) {
 		if(!latlng) return point.coordinates
-		else return [point.coordinates[1], point.coordinates[0]]
+		else return [point.coordinates[1], point.coordinates[0], point.coordinates[2]]
 	})
 }

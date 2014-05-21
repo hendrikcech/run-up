@@ -5,14 +5,14 @@ var L = require('leaflet')
 module.exports = React.createClass({
 	displayName: require('./package.json').name,
 	getDefaultProps: function() {
-		return { geoJSON: {}, selection: null }
+		return { geoJSON: {}, selection: [] }
 	},
 	getInitialState: function() {
 		return {
 			map: null,
 			// route: L.geoJson(),
 			route: L.polyline([], {}),
-			selection: L.polyline([], { color: 'red' })
+			selection: L.multiPolyline([], { color: 'red' })
 
 		}
 	},
@@ -31,14 +31,17 @@ module.exports = React.createClass({
 		state.map.fitBounds(state.route.getBounds(), zoomLevel)
 	},
 	selectSegment: function() {
-		var segment = this.props.model.getSegment(1000, 1000)
-		return this.props.model.getCoordinates(segment, true)
+		var selection = this.props.selection
+		if(selection.length === 0) return []
+		return selection.map(function(s) {
+			var segment = this.props.model.getSegment(s)
+			return this.props.model.getCoordinates(segment, true)
+		}, this)
 	},
 
 	render: function() {
 		var state = this.state
 		var props = this.props
-		console.log(props)
 		state.route.setLatLngs(props.model.getCoordinates(props.model.data.points, true))
 		state.selection.setLatLngs(this.selectSegment())
 		return (

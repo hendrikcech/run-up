@@ -6,53 +6,27 @@ module.exports = React.createClass({
 	displayName: require('./package.json').name,
 	getDefaultProps: function() {
 		return {
-			data: { points: [] }
+			// data: { points: [] }
+			model: {}
 		}
 	},
 	getInitialState: function() {
 		return { range: 1000 }
-	},
-	getGroupedData: function() { // in meters
-		var data = this.props.data
-		var res = []
-		var currentDistance = 0
-		var hrTotal = 0
-		var hrPoints = 0
-		var i = 1
-		data.points.forEach(function(point) {
-			hrTotal += point.hr
-			hrPoints++
-			if((currentDistance += point.length) >= this.state.range) {
-				res.push([
-					Math.round(point.distance) / 1000,
-					Math.round(hrTotal / hrPoints)
-				])
-				currentDistance = hrTotal = hrPoints = 0
-				i++
-			}
-		}, this)
-		return res
 	},
 	componentDidMount: function() {
 		var self = this
 		this.chart = new Highcharts.Chart({
 			chart: {
 				renderTo: 'graph',
-				type: 'column'
+				type: 'column',
 			},
 			title: { text: '' },
 			tooltip: {
 				headerFormat: '',
 				pointFormat: '<span style="color:{series.color}"><b>{point.y}</b><br/>'
 			},
-			xAxis: {
-				title: { text: 'km' },
-				// categories: ['km']
-				// type: 'categories'
-			},
-			yAxis: {
-				title: { text: 'Heart Rate' }
-			},
+			xAxis: {},
+			yAxis: { title: { text: 'Heart Rate' } },
 			legend: {
 				enabled: false
 			},
@@ -60,14 +34,16 @@ module.exports = React.createClass({
 				column: {
 					pointPadding: 0,
 					groupPadding: 0,
-					borderWidth: 1
+					borderWidth: 1,
+					allowPointSelect: true
 				},
 				series: {
 					cursor: 'pointer',
 					point: {
 						events: {
-							click: function(e) {
-								self.onColumnClick(e, this)							}
+							click: this.onSelectionChange,
+							mouseOver: this.onSelectionChange,
+							mouseOut: this.onSelectionChange
 						}
 					}
 				}
@@ -75,18 +51,45 @@ module.exports = React.createClass({
 			series: [{ name: 'HR', data: this.getGroupedData() }]
 		})
 	},
+	/*returns [distance in km, average hr in segment]*/
+	getGroupedData: function() {
+		var model = this.props.model
+		var range = this.state.range
+		var res = []
+		for(var start = 0; start < model.data.distance; start += range) {
+			var hr = model.getHR(model.getSegment([start, range]))
+			res.push([start, hr])
+		}
+		return res
+	},
 	onRangeChange: function(e) {
 		console.log(this.refs.range.getDOMNode().value)
 		this.setState({ range: this.refs.range.getDOMNode().value })
 	},
-	onColumnClick: function(e, point) {
-		console.log(e)
-		console.log(point)
+	onSelectionChange: function(e) {
+		var self = this
+		process.nextTick(function() {
+			var range = self.state.range
+			var selected = self.chart.getSelectedPoints().map(function(point) {
+				return [point.x, range]
+			})
+			if(e.type === 'mouseOver') {
+				selected.push([e.target.x, range])
+			}
+			self.props.onSelectionChange(selected) // [start, length]
+		})
+	},
+	shouldComponentUpdate: function(nextProps, nextState) {
+		// return this.props !== nextProps || this.state !== nextState
+		return false
 	},
 
 	render: function() {
 		if(this.chart) {
-			this.chart.series[0].setData(this.getGroupedData())
+			var d = this.getGroupedData()
+			// this.chart.series[0].setData(d, true)
+			this.chart.series[0].data = d
+			this.chart.redraw()
 		}
 		return (
 			<div className='panel graph'>

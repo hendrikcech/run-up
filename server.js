@@ -27,9 +27,6 @@ var flo = Flo('./app/', {
 var w = watchify(__dirname + '/app/app.js')
 	.transform(reactify)
 	.on('log', console.log)
-	.on('error', function(err) {
-		console.error(err)
-	})
 	.on('update', function() {
 		flo.server.broadcast({
 			match: 'indexOf',
@@ -41,6 +38,9 @@ var w = watchify(__dirname + '/app/app.js')
 
 function bundleJS(cb) {
 	return w.bundle({ debug: true }, cb)
+		.on('error', function(err) {
+			console.error(err)
+		})
 }
 bundleJS().on('data', function() {})
 

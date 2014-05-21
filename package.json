@@ -13,6 +13,7 @@
     "browserify": "^4.1.4",
     "browserify-shim": "^3.5.0",
     "envify": "^1.2.1",
+    "fastclick": "^1.0.1",
     "fb-flo": "0.0.2",
     "geo-distance-js": "0.0.2",
     "leaflet": "^0.7.2",

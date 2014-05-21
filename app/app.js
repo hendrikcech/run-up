@@ -1,5 +1,6 @@
 /** @jsx React.DOM */
 global.React = require('react')
+var attachFastClick = require('fastclick')
 
 var Model = require('./model.js')
 
@@ -15,11 +16,14 @@ var App = React.createClass({
 		this.model = new Model(this.props.geoJSON)
 		return {
 			data: this.model.data,
-			selected: null
+			selection: []
 		}
 	},
 	componentWillReceiveProps: function() {
 		this.setState({ data: convertGeoJSON(this.props.geoJSON) })
+	},
+	changeSelection: function(selection) {
+		this.setState({ selection: selection })
 	},
 
 	render: function() {
@@ -27,12 +31,13 @@ var App = React.createClass({
 		return (
 			<div className='container'>
 				<Info data={this.state.data} profile={this.props.profile} />
-				<Map selected={this.state.selected} model={this.model} />
-				<Graph data={this.state.data} />
+				<Map selection={this.state.selection} model={this.model} />
+				<Graph onSelectionChange={this.changeSelection} model={this.model} />
 			</div>
 		)
 	}
 })
 
+attachFastClick(document.body)
 React.initializeTouchEvents(true)
 React.renderComponent(<App geoJSON={run} profile={profile}/>, document.body)
