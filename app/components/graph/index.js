@@ -1,5 +1,6 @@
 /** @jsx React.DOM */
 var React = require('react')
+var moment = require('moment')
 //require('highcharts')
 
 module.exports = React.createClass({
@@ -14,11 +15,16 @@ module.exports = React.createClass({
 		return {
 			range: 500,
 			// chart: {},
+			dataType: 'pace',
 			supportsTouch: 'ontouchstart' in window
 		}
 	},
+	shouldComponentUpdate: function(nextProps, nextState) {
+		return this.state !== nextState
+	},
 	componentDidMount: function() {
 		var hr = this.props.model.data.hr
+		var dataType = this.state.dataType
 		this.state.chart = new Highcharts.Chart({
 			chart: {
 				renderTo: 'graph',
@@ -28,19 +34,36 @@ module.exports = React.createClass({
 			title: { text: '' },
 			tooltip: {
 				headerFormat: '',
-				pointFormat: '<span style="color:{series.color}"><b>{point.y}</b><br/>',
-				animation: false
+				// pointFormat: '<span style="color:{series.color}"><b>{point.y}</b><br/>',
+				animation: false,
+				formatter: function() {
+					var v = Highcharts.dateFormat('%M:%S', this.y)
+					return '<span style="color:'+ this.series.color +'"><b>'+ v +'</b><br/>'
+				}
 			},
+			animation: false,
 			xAxis: {},
-			yAxis: {
+			yAxis: [{
+				id: 'hrAxis',
+				type: 'linear',
 				title: { text: 'Heart Rate' },
 				floor: hr.avg - 20, ceiling: hr.avg + 15,
-				min: hr.min, max: hr.max
-			},
+				// min: hr.min, max: hr.max,
+				showEmpty: false
+			}, {
+				id: 'paceAxis',
+				title: { text: 'Pace' },
+				type: 'datetime',
+				dateTimeLabelFormats: {
+					minute: '%M:%S'
+				},
+				showEmpty: false
+			}],
 			legend: {
-				enabled: false
+				enabled: true
 			},
 			plotOptions: {
+				animation: false,
 				column: {
 					pointPadding: null,
 					groupPadding: null,
@@ -67,22 +90,52 @@ module.exports = React.createClass({
 					}
 				}
 			},
-			series: [{ name: 'HR', data: this.getGroupedData() }]
+			series: [{
+				id: 'hr',
+				name: 'HR',
+				data: this.getGroupedData('hr'),
+				yAxis: 'hrAxis',
+				visible: dataType === 'hr'
+			}, {
+				id: 'pace',
+				name: 'Pace',
+				data: this.getGroupedData('pace'),
+				yAxis: 'paceAxis',
+				visible: dataType === 'pace'
+			}]
 		})
+		// this.showSelectedDataType()
+		window.c = this.state.chart
 	},
 	/*returns [distance in km, average hr in segment]*/
-	getGroupedData: function() {
+	getGroupedData: function(type) {
 		var model = this.props.model
 		var range = this.state.range
+		var dataType = type || this.state.dataType
 		var res = []
 		for(var start = 0; start < model.data.distance; start += range) {
-			var hr = model.getHR(model.getSegment([start, range]))
-			res.push([start, hr])
+			var segment = model.getSegment([start, range])
+			var data = model.getAvg(dataType, segment)
+			res.push([start, data])
 		}
+		// console.log(JSON.stringify(res))
 		return res
+	},
+	showSelectedDataType: function() {
+		var chart = this.state.chart
+		if(!chart) return
+		var hr = chart.get('hr'), pace = chart.get('pace')
+		var hrVisible = this.state.dataType === 'hr'
+		hr.setVisible(hrVisible, false)
+		pace.setVisible(!hrVisible, true)
+		hr.setData(this.getGroupedData('hr'), true, false, false)
+		pace.setData(this.getGroupedData('pace'), true, false, false)
 	},
 	onRangeChange: function(newRange) {
 		this.setState({ range: newRange })
+	},
+	onDataTypeChange: function(type) {
+		this.setState({ dataType: type })
 	},
 	onSelectionChange: function(e, nextTick) {
 		if(!nextTick) {
@@ -102,19 +155,15 @@ module.exports = React.createClass({
 
 		this.props.onSelectionChange(selected) // [start, length]
 	},
-	shouldComponentUpdate: function(nextProps, nextState) {
-		return this.state.range !== nextState.range
-	},
 
 	render: function() {
 		console.log('redraw')
-		if(this.state.chart) {
-			this.state.chart.series[0].setData(this.getGroupedData(), true, true, false)
-		}
+		this.showSelectedDataType()
 		return (
 			<div className='panel graph'>
 				<div className='graph__toolbar'>
-					<Range onChange={this.onRangeChange} value={this.state.range} />
+					<RangePicker onChange={this.onRangeChange} value={this.state.range} />
+					<DataTypePicker onChange={this.onDataTypeChange} value={this.state.dataType} />
 				</div>
 				<div id='graph' />
 			</div>
@@ -122,7 +171,29 @@ module.exports = React.createClass({
 	}
 })
 
-var Range = React.createClass({
+var DataTypePicker = React.createClass({
+	getDefaultProps: function() {
+		return {
+			value: 'hr',
+			onChange: function() {}
+		}
+	},
+	onClick: function(type) {
+		this.props.onChange(type)
+	},
+	render: function() {
+		var value = this.props.value
+		var classes = 'graph__button graph__type-button'
+		return (
+			<div className='graph__type'>
+				<button className={classes} onClick={this.onClick.bind(null, 'hr')} disabled={value == 'hr'}>HR</button>
+				<button className={classes} onClick={this.onClick.bind(null, 'pace')} disabled={value == 'pace'}>Pace</button>
+			</div>
+		)
+	}
+})
+
+var RangePicker = React.createClass({
 	getDefaultProps: function() {
 		return {
 			min: 250,
@@ -146,10 +217,10 @@ var Range = React.createClass({
 		return (
 			<div className='graph__range'>
 				<button onClick={this.onMinus} disabled={props.value === props.min}
-					className='graph__range-button'>-</button>
+					className='graph__button graph__range-button'>-</button>
 				<span className='graph__range-value'>{this.props.value}</span>
 				<button onClick={this.onPlus} disabled={props.value === props.max}
-					className='graph__range-button'>+</button>
+					className='graph__button graph__range-button'>+</button>
 			</div>
 		)
 	}

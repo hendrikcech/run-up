@@ -11,9 +11,8 @@ module.exports = React.createClass({
 		return {
 			map: null,
 			// route: L.geoJson(),
-			route: L.polyline([], {}),
+			route: L.polyline([], { }),
 			selection: L.multiPolyline([], { color: 'red' })
-
 		}
 	},
 	componentDidMount: function() {

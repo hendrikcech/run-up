@@ -63,12 +63,15 @@ Model.prototype._convertGeoJSON = function(json) {
 			duration: null // time passed since last point in ms
 		}
 
-		var distance = getDistance(co[i-1][1], co[i-1][0], co[i][1], co[i][0])
-		point.length = Math.round(distance * 100) / 100,
+		var distance = getDistance(co[i-1][1], co[i-1][0], co[i][1], co[i][0], 10)
+		// point.length = Math.round(distance * 100) / 100,
+		point.length = distance
 		point.duration = new Date(times[i]) - new Date(times[i-1])
 
-		var ms = point.length / (point.duration / 1000) // convert to seconds
-		if(ms > 0) point.pace = Math.round(1000 / ms)
+		// var ms = point.length / (point.duration / 1000) // convert to seconds
+		// if(ms > 0) point.pace = Math.round(1000 / ms)
+		var mss = point.length / point.duration
+		if(mss > 0) point.pace = 1000 / mss // pace in ms per km
 
 		if(point.pace) {
 			res.distance += point.length
@@ -76,28 +79,31 @@ Model.prototype._convertGeoJSON = function(json) {
 			
 			hrPoints.push(point.hr)
 			pacePoints.push(point.pace)
+		} else {
+			console.log(i, mss, pointd)
 		}
 
 		point.time = res.duration
-		point.distance = Math.round(res.distance * 100) / 100
+		// point.distance = Math.round(res.distance * 100) / 100
+		point.distance = res.distance
 
 		res.points.push(point)
 	}
 
 	res.time = times[0]
 	res.hr = {
-		avg: avg(hrPoints.reduce(sum), hrPoints.length),
+		avg: hrPoints.reduce(sum) /  hrPoints.length,
 		min: Math.min.apply(null, hrPoints),
 		max: Math.max.apply(null, hrPoints)
 	}
 
 	res.pace = {
-		avg: avg(pacePoints.reduce(sum), pacePoints.length),
+		avg: pacePoints.reduce(sum) / pacePoints.length,
 		min: Math.min.apply(null, pacePoints),
 		max: Math.max.apply(null, pacePoints)
 	}
 	res.distance = Math.round(res.distance * 100) / 100
-
+console.log(res)
 	return res
 }
 
@@ -120,9 +126,9 @@ Model.prototype.getSegment = function(boundaries) { // both in m
 	return points
 }
 
-Model.prototype.getHR = function(points) {
+Model.prototype.getAvg = function(type, points) {
 	var total = points.reduce(function(memo, point) {
-		return memo + point.hr
+		return memo + point[type] // hr, pace, ...
 	}, 0)
 	return Math.round(total / points.length)
 }

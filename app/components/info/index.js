@@ -11,8 +11,8 @@ module.exports = React.createClass({
 		var name = data.name || 'Random Run'
 		var time = moment(data.time).calendar()
 		var duration = moment.duration(data.duration, 'milliseconds')
-		var distance = Math.round(data.distance / 1000 * 100) / 100
-		var pace = moment.duration(data.pace.avg, 'seconds')
+		var distance = WTZ(Math.round(data.distance / 1000 * 100) / 100)
+		var pace = moment.duration(data.pace.avg, 'milliseconds')
 		return (
 			<div className='info panel'>
 				<div className='info__top'>
@@ -42,7 +42,7 @@ module.exports = React.createClass({
 						<span className='info__item-label'>Pace</span>
 					</div>
 					<div className='info__item'>
-						<span className='info__item-value'>{data.hr.avg}</span>
+						<span className='info__item-value'>{Math.round(data.hr.avg)}</span>
 						<span className='info__item-label'>Heart Rate</span>
 					</div>
 				</div>
@@ -56,6 +56,16 @@ function WLZ(d) { // withLeadingZero
 	var str = d.toString()
 	if(str.length < 2) {
 		return '0' + str
+	}
+	return str
+}
+function WTZ(d) { // withTrailingZero
+	var str = d.toString()
+	if(str.indexOf('.') === -1) {
+		return str + '.00'
+	}
+	if(str.split('.')[1].length < 2) {
+		return str + '0'
 	}
 	return str
 }
