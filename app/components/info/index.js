@@ -15,8 +15,8 @@ module.exports = React.createClass({
 		var time = moment(data.startTime).calendar()
 		var duration = moment.duration(data.duration, 'milliseconds')
 		var distance = WTZ(Math.round(data.distance / 1000 * 100) / 100)
-		var pace = moment.duration(data.pace, 'milliseconds')
-		var hr = Math.round(data.hr)
+		var pace = moment.duration(data.pace.avg, 'milliseconds')
+		var hr = Math.round(data.hr.avg)
 		return (
 			<div className='info panel'>
 				<div className='info__top'>

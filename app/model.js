@@ -8,9 +8,20 @@ function Model(json) {
 	this.startTime = json.points[0].time
 	this.duration = this.getDuration(this.points)
 	this.distance = this.getDistance(this.points)
-	this.hr = this.getHR(this.points)
-	// this.pace = calcPace(this.distance, this.duration)
-	this.pace = this.getPace(this.points)
+
+	var hr = this.points.map(function(p) { return p.hr })
+	this.hr = {
+		avg: this.getHR(this.points),
+		min: Math.min.apply(null, hr),
+		max: Math.max.apply(null, hr)
+	}
+
+	var pace = this.points.map(function(p) { return p.pace })
+	this.pace = {
+		avg: this.getPace(this.points),
+		min: Math.min.apply(null, pace),
+		max: Math.max.apply(null, pace)
+	}
 	console.log(this)
 }
 
