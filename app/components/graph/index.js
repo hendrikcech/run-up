@@ -8,14 +8,14 @@ module.exports = React.createClass({
 	getDefaultProps: function() {
 		return {
 			// data: { points: [] }
-			model: {}
+			data: {}
 		}
 	},
 	getInitialState: function() {
 		return {
-			range: 500,
+			range: 1000,
 			// chart: {},
-			dataType: 'pace',
+			dataType: 'hr',
 			supportsTouch: 'ontouchstart' in window
 		}
 	},
@@ -23,7 +23,7 @@ module.exports = React.createClass({
 		return this.state !== nextState
 	},
 	componentDidMount: function() {
-		var hr = this.props.model.data.hr
+		var hr = this.props.data.hr
 		var dataType = this.state.dataType
 		this.state.chart = new Highcharts.Chart({
 			chart: {
@@ -37,7 +37,11 @@ module.exports = React.createClass({
 				// pointFormat: '<span style="color:{series.color}"><b>{point.y}</b><br/>',
 				animation: false,
 				formatter: function() {
-					var v = Highcharts.dateFormat('%M:%S', this.y)
+					if(this.series.options.id === 'pace') {
+						var v = Highcharts.dateFormat('%M:%S', this.y)
+					} else {
+						var v = this.y
+					}
 					return '<span style="color:'+ this.series.color +'"><b>'+ v +'</b><br/>'
 				}
 			},
@@ -47,7 +51,7 @@ module.exports = React.createClass({
 				id: 'hrAxis',
 				type: 'linear',
 				title: { text: 'Heart Rate' },
-				floor: hr.avg - 20, ceiling: hr.avg + 15,
+				floor: hr - 20, ceiling: hr + 15,
 				// min: hr.min, max: hr.max,
 				showEmpty: false
 			}, {
@@ -60,7 +64,7 @@ module.exports = React.createClass({
 				showEmpty: false
 			}],
 			legend: {
-				enabled: true
+				enabled: false
 			},
 			plotOptions: {
 				animation: false,
@@ -107,18 +111,22 @@ module.exports = React.createClass({
 		// this.showSelectedDataType()
 		window.c = this.state.chart
 	},
-	/*returns [distance in km, average hr in segment]*/
+	/*returns [distance in km, average value in segment]*/
 	getGroupedData: function(type) {
-		var model = this.props.model
+		var data = this.props.data
 		var range = this.state.range
 		var dataType = type || this.state.dataType
 		var res = []
-		for(var start = 0; start < model.data.distance; start += range) {
-			var segment = model.getSegment([start, range])
-			var data = model.getAvg(dataType, segment)
-			res.push([start, data])
+		for(var start = 0; start < data.distance; start += range) {
+			var segment = data.getSegment([start, range])
+			if(dataType === 'pace') {
+				var value = data.getPace(segment)
+			} else {
+				var value = data.getHR(segment)
+			}
+			res.push([start, value])
 		}
-		// console.log(JSON.stringify(res))
+		console.log(JSON.stringify(res))
 		return res
 	},
 	showSelectedDataType: function() {

@@ -9,35 +9,30 @@ var Graph = require('./components/graph')
 var Map = require('./components/map')
 
 var profile = require('./profile.json')
-var run = require('./run.json')
+var run = require('./run-converted.json')
 
 var App = React.createClass({
 	getInitialState: function() {
-		this.model = new Model(this.props.geoJSON)
-		return {
-			data: this.model.data,
-			selection: []
-		}
-	},
-	componentWillReceiveProps: function() {
-		this.setState({ data: convertGeoJSON(this.props.geoJSON) })
+		return { selection: [] }
 	},
 	changeSelection: function(selection) {
 		this.setState({ selection: selection })
 	},
 
 	render: function() {
-		window.state = this.state
 		return (
 			<div className='container'>
-				<Info data={this.state.data} profile={this.props.profile} />
-				<Map selection={this.state.selection} model={this.model} />
-				<Graph onSelectionChange={this.changeSelection} model={this.model} />
+				<Info data={this.props.data} profile={this.props.profile} />
+				<Map data={this.props.data} selection={this.state.selection} />
+				<Graph data={this.props.data}
+					onSelectionChange={this.changeSelection} />
 			</div>
 		)
 	}
 })
 
+var model = new Model(run)
+
 attachFastClick(document.body)
 React.initializeTouchEvents(true)
-React.renderComponent(<App geoJSON={run} profile={profile}/>, document.body)
+React.renderComponent(<App data={model} profile={profile}/>, document.body)

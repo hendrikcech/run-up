@@ -5,14 +5,18 @@ var distance = require('geo-distance-js').getDistance
 
 module.exports = React.createClass({
 	displayName: require('./package.json').name,
+	getDefaultProps: function() {
+		return { data: {} }
+	},
 
 	render: function() {
 		var data = this.props.data
-		var name = data.name || 'Random Run'
-		var time = moment(data.time).calendar()
+		var name = data.name
+		var time = moment(data.startTime).calendar()
 		var duration = moment.duration(data.duration, 'milliseconds')
 		var distance = WTZ(Math.round(data.distance / 1000 * 100) / 100)
-		var pace = moment.duration(data.pace.avg, 'milliseconds')
+		var pace = moment.duration(data.pace, 'milliseconds')
+		var hr = Math.round(data.hr)
 		return (
 			<div className='info panel'>
 				<div className='info__top'>
@@ -42,7 +46,7 @@ module.exports = React.createClass({
 						<span className='info__item-label'>Pace</span>
 					</div>
 					<div className='info__item'>
-						<span className='info__item-value'>{Math.round(data.hr.avg)}</span>
+						<span className='info__item-value'>{hr}</span>
 						<span className='info__item-label'>Heart Rate</span>
 					</div>
 				</div>

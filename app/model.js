@@ -1,136 +1,57 @@
 var getDistance = require('geo-distance-js').getDistance
-var moment = require('moment')
-
-/*{
-	name: "",
-	time: start time,
-	duration: total moving time in seconds,
-	hr: average hr of moving points in bmp,
-	pace: average pace in seconds per km,
-	distance: total distance in m,
-	// coordinates: raw array,
-	points: [{
-		time: time moving since start of activity in seconds,
-		distance: distance since start in m,
-		hr: hr in bmp,
-		coordinates: [lon, lat, ele]
-		pace: in seconds per km,
-		moving: true if paces > 8 min/km (?),
-		length: distance of this point,
-		duration: time passed during this point
-	}]
-}*/
 
 module.exports = Model
-function Model(geoJSON) {
-	this.data = this._convertGeoJSON(geoJSON)
+function Model(json) {
+	// this.data = this._convertJSON(json)
+	this.name = json.name || 'Random Run'
+	this.points = processPoints(json.points)
+	this.startTime = json.points[0].time
+	this.duration = this.getDuration(this.points)
+	this.distance = this.getDistance(this.points)
+	this.hr = this.getHR(this.points)
+	// this.pace = calcPace(this.distance, this.duration)
+	this.pace = this.getPace(this.points)
+	console.log(this)
 }
 
-Model.prototype._convertGeoJSON = function(json) {
-	var co = json.features[0].geometry.coordinates
-	var hr = json.features[0].properties.hr
-	var times = json.features[0].properties.times
-
-	var res = {
-		name: json.features[0].properties.name || '', // name of activity
-		time: times[0], // start time
-		pace: { // pace of active points in seconds per km
-			avg: null,
-			min: null,
-			max: null
-		},
-		hr: { // hr of active points in bmp
-			avg: null,
-			min: null,
-			max: null
-		},
-		distance: 0, // total active distance in m
-		duration: 0, // total active time in ms
-		points: []
-	}
-
-	var hrPoints = []
-	var pacePoints = []
-
-	for(var i = 1; i < co.length; i++) { // start at seconds point
-		var point = {
-			time: null, // total active time since start in seconds
-			coordinates: co[i], // lat, lng, ele data point
-			pace: null, // in seconds per km
-			hr: hr[i] || 0, // in bmp
-			distance: 0, // distance at start of point since start of activity (round 2 decimals)
-			length: null, // distance passed since last point in m (round 2 decimals)
-			duration: null // time passed since last point in ms
-		}
-
-		var distance = getDistance(co[i-1][1], co[i-1][0], co[i][1], co[i][0], 10)
-		// point.length = Math.round(distance * 100) / 100,
-		point.length = distance
-		point.duration = new Date(times[i]) - new Date(times[i-1])
-
-		// var ms = point.length / (point.duration / 1000) // convert to seconds
-		// if(ms > 0) point.pace = Math.round(1000 / ms)
-		var mss = point.length / point.duration
-		if(mss > 0) point.pace = 1000 / mss // pace in ms per km
-
-		if(point.pace) {
-			res.distance += point.length
-			res.duration += point.duration
-			
-			hrPoints.push(point.hr)
-			pacePoints.push(point.pace)
-		} else {
-			console.log(i, mss, pointd)
-		}
-
-		point.time = res.duration
-		// point.distance = Math.round(res.distance * 100) / 100
-		point.distance = res.distance
-
-		res.points.push(point)
-	}
-
-	res.time = times[0]
-	res.hr = {
-		avg: hrPoints.reduce(sum) /  hrPoints.length,
-		min: Math.min.apply(null, hrPoints),
-		max: Math.max.apply(null, hrPoints)
-	}
-
-	res.pace = {
-		avg: pacePoints.reduce(sum) / pacePoints.length,
-		min: Math.min.apply(null, pacePoints),
-		max: Math.max.apply(null, pacePoints)
-	}
-	res.distance = Math.round(res.distance * 100) / 100
-console.log(res)
-	return res
+Model.prototype.getDuration = function(points) {
+	return points.reduce(function(memo, point) {
+		return memo + point.time
+	}, 0)
 }
 
-function sum(a, b) {
-	return a + b
-}
-
-function avg(sum, n) {
-	return Math.round(sum / n)
+Model.prototype.getDistance = function(points) {
+	return points.reduce(function(memo, point) {
+		return memo + point.distance
+	}, 0)
 }
 
 Model.prototype.getSegment = function(boundaries) { // both in m
 	var start = boundaries[0]
 	var length = boundaries[1]
 	var points = []
-	this.data.points.forEach(function(point) {
-		if(point.distance < start || point.distance > start + length) return
+	this.points.forEach(function(point) {
+		if(point.totalDistance < start || point.totalDistance > start + length) return
 		points.push(point)
 	}, this)
 	return points
 }
 
-Model.prototype.getAvg = function(type, points) {
+Model.prototype.getHR = function(points) {
 	var total = points.reduce(function(memo, point) {
-		return memo + point[type] // hr, pace, ...
+		return memo + point.hr
 	}, 0)
 	return Math.round(total / points.length)
+}
+
+Model.prototype.getPace = function(points) {
+	var vals = points.reduce(function(memo, point) {
+		return {
+			distance: memo.distance + point.distance,
+			time: memo.time + point.time
+		}
+	}, { distance: 0, time: 0 })
+	return calcPace(vals.distance, vals.time)
 }
 
 Model.prototype.getCoordinates = function(points, latlng) {
@@ -139,3 +60,87 @@ Model.prototype.getCoordinates = function(points, latlng) {
 		else return [point.coordinates[1], point.coordinates[0], point.coordinates[2]]
 	})
 }
+
+function processPoints(points) {
+	var totalTime = 0
+	var totalDist = 0
+	return points.map(function(p, i) {
+		var p1 = points[i-1]
+		if(!p1) {
+			p1 = { time: p.time, coordinates: p.coordinates }
+		}
+		var time = timeDiff(p.time, p1.time)
+		var dist = distDiff(p.coordinates, p1.coordinates)
+		return {
+			coordinates: p.coordinates,
+			hr: p.hr,
+			time: time,
+			distance: dist,
+			totalTime: (totalTime += time),
+			totalDistance: (totalDist += dist),
+			pace: calcPace(dist, time) || 0
+		}
+	})
+}
+function timeDiff(t1, t2) {
+	return Math.abs(Date.parse(t1) - Date.parse(t2))
+}
+function distDiff(d1, d2) {
+	return getDistance(d1[1], d1[0], d2[1], d2[0], 10)
+}
+function calcPace(dist, time) {
+	return 1000 / (dist / time)
+}
+
+// Model.prototype._convertJSON = function(json) {
+
+// 	for(var i = 1; i < json.points.length; i++) { // start at second point
+// 		var point = json.points[i]
+// 		point.
+// 	}
+
+	// for(var i = 1; i < json.points.length; i++) { // start at seconds point
+	// 	var point = {
+	// 		coordinates: co[i], // lat, lng, ele data point
+	// 		hr: hr[i] || 0, // in bmp
+	// 		//totalTime: null, // total active time since start in seconds
+	// 		//totalDistance: 0, // distance at start of point since start of activity
+	// 		distance: null, // distance passed since last point in m
+	// 		time: null, // time passed since last point in ms
+	// 		pace: null // in milliseconds per km
+	// 	}
+
+	// 	point.distance = getDistance(co[i-1][1], co[i-1][0], co[i][1], co[i][0], 10)
+	// 	point.time = new Date(times[i]) - new Date(times[i-1])
+
+	// 	var mms = point.length / point.duration // meters per millisecond
+	// 	point.pace = 1000 / mms // pace in ms per km
+
+	// 	points.push(point)
+	// }
+
+	// res.time = times[0]
+	// res.hr = {
+	// 	avg: hrPoints.reduce(sum) /  hrPoints.length,
+	// 	min: Math.min.apply(null, hrPoints),
+	// 	max: Math.max.apply(null, hrPoints)
+	// }
+
+	// res.pace = {
+	// 	avg: pacePoints.reduce(sum) / pacePoints.length,
+	// 	min: Math.min.apply(null, pacePoints),
+	// 	max: Math.max.apply(null, pacePoints)
+	// }
+	// res.distance = Math.round(res.distance * 100) / 100
+
+// console.log(points)
+// 	return res
+// }
+
+// function sum(a, b) {
+// 	return a + b
+// }
+
+// function avg(sum, n) {
+// 	return Math.round(sum / n)
+// }
