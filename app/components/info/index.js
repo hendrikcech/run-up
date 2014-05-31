@@ -35,7 +35,7 @@ module.exports = React.createClass({
 					</div>
 					<div className='info__item'>
 						<span className='info__item-value'>
-							{WLZ(duration.minutes()) +':'+ WLZ(duration.seconds())}
+							{WLZ(duration.asMinutes()) +':'+ WLZ(duration.seconds())}
 						</span>
 						<span className='info__item-label'>Duration</span>
 					</div>
@@ -57,7 +57,7 @@ module.exports = React.createClass({
 
 
 function WLZ(d) { // withLeadingZero
-	var str = d.toString()
+	var str = d.toString().split('.')[0]
 	if(str.length < 2) {
 		return '0' + str
 	}

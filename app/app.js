@@ -9,7 +9,7 @@ var Graph = require('./components/graph')
 var Map = require('./components/map')
 
 var profile = require('./profile.json')
-var run = require('./run-converted.json')
+var run = require('./run2.json')
 
 var App = React.createClass({
 	getInitialState: function() {

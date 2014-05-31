@@ -68,7 +68,8 @@ module.exports = React.createClass({
 			}, {
 				id: 'paceAxis',
 				title: { text: 'Pace' },
-				floor: pace.min - 12000, ceiling: pace.max + 4000,
+				// floor: pace.min - 12000,
+				ceiling: pace.max + 4000,
 				type: 'datetime',
 				dateTimeLabelFormats: {
 					minute: '%M:%S'
