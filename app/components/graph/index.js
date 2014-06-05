@@ -58,16 +58,17 @@ module.exports = React.createClass({
 			},
 			colors: ['#7cb5ec'],
 			animation: false,
+			credits: { enabled: false },
 			xAxis: {},
 			yAxis: [{
 				id: 'hrAxis',
 				type: 'linear',
-				title: { text: 'Heart Rate' },
+				title: { text: null },
 				floor: hr.min - 30, ceiling: hr.max + 10,
 				showEmpty: false
 			}, {
 				id: 'paceAxis',
-				title: { text: 'Pace' },
+				title: { text: null },
 				// floor: pace.min - 12000,
 				ceiling: pace.max + 4000,
 				type: 'datetime',
@@ -109,13 +110,11 @@ module.exports = React.createClass({
 			},
 			series: [{
 				id: 'hr',
-				name: 'HR',
 				data: hr.values,
 				yAxis: 'hrAxis',
 				visible: dataType === 'hr'
 			}, {
 				id: 'pace',
-				name: 'Pace',
 				data: pace.values,
 				yAxis: 'paceAxis',
 				visible: dataType === 'pace'

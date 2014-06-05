@@ -19,6 +19,7 @@
 	box-sizing: border-box;
 	padding: 10px;
 	justify-content: space-between;
+	margin-bottom: 15px;
 }
 
 .graph__button {
@@ -36,7 +37,7 @@
 
 .graph__range {
 	background-color: white;
-	width: 130px;
+	width: 125px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -65,14 +66,14 @@ button:active.graph__range-button {
 
 .graph__type {
 	height: 100%;
-	width: 130px;
+	width: 125px;
 	display: flex;
 }
 .graph__type-button {
 
 }
 .graph__type-button[disabled] {
-	background-color: #ebebeb;
+	/*background-color: #ebebeb;*/
 	border-color: #adadad;
 	box-shadow: inset 0 3px 5px rgba(0,0,0,.125);
 }
