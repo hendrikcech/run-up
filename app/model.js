@@ -2,7 +2,6 @@ var getDistance = require('geo-distance-js').getDistance
 
 module.exports = Model
 function Model(json) {
-	// this.data = this._convertJSON(json)
 	this.name = json.name || 'Random Run'
 	this.points = processPoints(json.points)
 	this.startTime = json.points[0].time
@@ -102,56 +101,3 @@ function distDiff(d1, d2) {
 function calcPace(dist, time) {
 	return 1000 / (dist / time)
 }
-
-// Model.prototype._convertJSON = function(json) {
-
-// 	for(var i = 1; i < json.points.length; i++) { // start at second point
-// 		var point = json.points[i]
-// 		point.
-// 	}
-
-	// for(var i = 1; i < json.points.length; i++) { // start at seconds point
-	// 	var point = {
-	// 		coordinates: co[i], // lat, lng, ele data point
-	// 		hr: hr[i] || 0, // in bmp
-	// 		//totalTime: null, // total active time since start in seconds
-	// 		//totalDistance: 0, // distance at start of point since start of activity
-	// 		distance: null, // distance passed since last point in m
-	// 		time: null, // time passed since last point in ms
-	// 		pace: null // in milliseconds per km
-	// 	}
-
-	// 	point.distance = getDistance(co[i-1][1], co[i-1][0], co[i][1], co[i][0], 10)
-	// 	point.time = new Date(times[i]) - new Date(times[i-1])
-
-	// 	var mms = point.length / point.duration // meters per millisecond
-	// 	point.pace = 1000 / mms // pace in ms per km
-
-	// 	points.push(point)
-	// }
-
-	// res.time = times[0]
-	// res.hr = {
-	// 	avg: hrPoints.reduce(sum) /  hrPoints.length,
-	// 	min: Math.min.apply(null, hrPoints),
-	// 	max: Math.max.apply(null, hrPoints)
-	// }
-
-	// res.pace = {
-	// 	avg: pacePoints.reduce(sum) / pacePoints.length,
-	// 	min: Math.min.apply(null, pacePoints),
-	// 	max: Math.max.apply(null, pacePoints)
-	// }
-	// res.distance = Math.round(res.distance * 100) / 100
-
-// console.log(points)
-// 	return res
-// }
-
-// function sum(a, b) {
-// 	return a + b
-// }
-
-// function avg(sum, n) {
-// 	return Math.round(sum / n)
-// }

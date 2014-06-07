@@ -4,25 +4,31 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "mkdir -p dist/ && node build.js",
+    "watch": "mkdir -p dist/ && node build.js -w"
   },
   "author": "Hendrik Cech",
   "license": "MIT",
   "dependencies": {
-    "autoprefixer": "^1.1.20140512",
-    "browserify": "^4.1.4",
-    "browserify-shim": "^3.5.0",
-    "envify": "^1.2.1",
     "fastclick": "^1.0.1",
-    "fb-flo": "0.0.2",
     "geo-distance-js": "0.0.2",
     "leaflet": "^0.7.2",
     "moment": "^2.6.0",
     "normalize.css": "^3.0.1",
-    "react": "^0.10.0",
+    "react": "^0.10.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^1.1.20140512",
+    "browserify": "^4.1.4",
+    "concat-stream": "^1.4.6",
+    "envify": "^1.2.1",
+    "exorcist": "^0.1.6",
+    "gaze": "^0.6.4",
     "reactify": "^0.13.1",
     "rework": "^0.20.3",
     "rework-npm": "^0.6.1",
+    "uglify-js": "^2.4.13",
     "watchify": "^0.10.1"
   }
 }
