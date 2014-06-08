@@ -23,7 +23,7 @@ var CSS_OUT = joinDir('/dist/bundle.css')
 var watch = process.argv[2] === '-w'
 
 /* process all the javascripts */
-var externals = ['react', 'leaflet', 'moment', 'fastclick', 'geo-distance-js']
+var externals = ['react', 'leaflet', 'moment', 'fastclick', 'gps-distance']
 
 // app code bundle
 var i = watch ? watchify : browserify

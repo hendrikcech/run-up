@@ -1,4 +1,4 @@
-var getDistance = require('geo-distance-js').getDistance
+var gpsDistance = require('gps-distance')
 
 module.exports = Model
 function Model(json) {
@@ -96,7 +96,7 @@ function timeDiff(t1, t2) {
 	return Math.abs(Date.parse(t1) - Date.parse(t2))
 }
 function distDiff(d1, d2) {
-	return getDistance(d1[1], d1[0], d2[1], d2[0], 10)
+	return gpsDistance(d1[1], d1[0], d2[1], d2[0]) * 1000
 }
 function calcPace(dist, time) {
 	return 1000 / (dist / time)
