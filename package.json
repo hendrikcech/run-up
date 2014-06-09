@@ -16,7 +16,8 @@
     "leaflet": "^0.7.2",
     "moment": "^2.6.0",
     "normalize.css": "^3.0.1",
-    "react": "^0.10.0"
+    "react": "^0.10.0",
+    "react-router": "git://github.com/rpflorence/react-router"
   },
   "devDependencies": {
     "autoprefixer": "^1.1.20140512",

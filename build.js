@@ -25,11 +25,14 @@ var watch = process.argv[2] === '-w'
 /* process all the javascripts */
 var externals = ['react', 'leaflet', 'moment', 'fastclick', 'gps-distance']
 
+process.on('uncaughtException', function() { console.error('uncaught!') })
+
 // app code bundle
 var i = watch ? watchify : browserify
 var b = i(JS_IN)
 	.external(externals)
 	.transform(reactify)
+	.on('error', console.error.bind(console))
 	.on('update', bundleJS)
 
 function bundleJS() {
@@ -72,16 +75,20 @@ function minify(file, stream) {
 
 /* css stuff */
 function bundleCSS() {
-	var cssStr = fs.readFileSync(CSS_IN).toString()
-	var css = rework(cssStr)
-		.use(reworkNPM({
-			dir: path.dirname(CSS_IN),
-			shim: { 'leaflet': 'dist/leaflet.css' }
-		})).toString({ compress: !watch })
-	fs.writeFile(CSS_OUT, autoprefixer.process(css).css, function(err) {
-		if(err) console.error(err)
-		else console.log((!watch ? 'minified ' : '') + 'css bundle written')
-	})
+	try {
+		var cssStr = fs.readFileSync(CSS_IN).toString()
+		var css = rework(cssStr)
+			.use(reworkNPM({
+				dir: path.dirname(CSS_IN),
+				shim: { 'leaflet': 'dist/leaflet.css' }
+			})).toString({ compress: !watch })
+		fs.writeFile(CSS_OUT, autoprefixer.process(css).css, function(err) {
+			if(err) console.error(err)
+			else console.log((!watch ? 'minified ' : '') + 'css bundle written')
+		})
+	} catch(e) {
+		console.error(e)
+	}
 }
 bundleCSS()
 

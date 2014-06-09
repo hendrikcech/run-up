@@ -1,31 +1,28 @@
 /** @jsx React.DOM */
 global.React = require('react')
 var attachFastClick = require('fastclick')
+var ReactRouter = require('react-router')
+var Router = ReactRouter.Router
+var Route = ReactRouter.Route
+var Link = ReactRouter.Link
 
 var Model = require('./model.js')
 
-var Info = require('./components/info')
-var Graph = require('./components/graph')
-var Map = require('./components/map')
+var User = require('./pages/user')
+var Run = require('./pages/run')
 
 var profile = require('./profile.json')
 var run = require('./run2.json')
 
 var App = React.createClass({
-	getInitialState: function() {
-		return { selection: [] }
-	},
-	changeSelection: function(selection) {
-		this.setState({ selection: selection })
-	},
-
 	render: function() {
 		return (
-			<div className='container'>
-				<Info data={this.props.data} profile={this.props.profile} />
-				<Map data={this.props.data} selection={this.state.selection} />
-				<Graph data={this.props.data}
-					onSelectionChange={this.changeSelection} />
+			<div>
+				<Link to='index'>Index</Link>
+				<Link to='run'>Run</Link>
+				<div className='container'>
+					{this.props.activeRoute}
+				</div>
 			</div>
 		)
 	}
@@ -35,4 +32,10 @@ var model = new Model(run)
 
 attachFastClick(document.body)
 React.initializeTouchEvents(true)
-React.renderComponent(<App data={model} profile={profile}/>, document.body)
+
+Router(
+	<Route handler={App}>
+		<Route name="index" path="/" handler={User} profile={profile} />
+		<Route name="run" path="run" handler={Run} data={model} profile={profile} />
+	</Route>
+).renderComponent(document.body)

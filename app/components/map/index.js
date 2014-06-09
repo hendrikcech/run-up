@@ -3,7 +3,7 @@ var React = require('react')
 var L = require('leaflet')
 
 module.exports = React.createClass({
-	displayName: require('./package.json').name,
+	displayName: 'map',
 	getDefaultProps: function() {
 		return { data: {}, selection: [] }
 	},
@@ -46,7 +46,7 @@ module.exports = React.createClass({
 		state.route.setLatLngs(data.getCoordinates(data.points, true))
 		state.selection.setLatLngs(this.selectSegment())
 		return (
-			<div className='panel' id='map' />
+			<div id='map' />
 		)
 	}
 })

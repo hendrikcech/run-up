@@ -1,8 +1,8 @@
 @import "normalize.css";
 @import "leaflet";
-@import "./components/info";
-@import "./components/graph";
-@import "./components/map";
+@import "./pages/run";
+@import "./pages/user";
+
 
 * {
 	box-sizing: border-box;
@@ -25,5 +25,6 @@ body {
 	width: 100%;
 	background-color: #fafafa;
 	margin-bottom: 10px;
-	box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+	box-shadow: 1px 1px 1px 1px rgba(0,0,0,0.1);
+	position: relative;
 }

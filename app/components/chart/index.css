@@ -1,0 +1,40 @@
+@import "./data-picker";
+@import "./range-picker";
+
+.chart {
+
+}
+
+#chart {
+	height: 350px;
+	-webkit-user-select: none;
+}
+@media all and (max-width: 699px) {
+	#chart {
+		height: 200px;
+	}
+}
+
+.chart__toolbar {
+	height: 50px;
+	background: steelblue;
+	display: flex;
+	box-sizing: border-box;
+	padding: 10px;
+	justify-content: space-between;
+	margin-bottom: 15px;
+}
+
+.chart__button {
+	background-color: white;
+	/*border-radius: 4px;*/
+	border: 1px solid transparent;
+	/*padding: 6px 12px;*/
+	padding: 0;
+	font-size: 14px;
+	user-select: none;
+	flex-grow: 1;
+	height: 100%;
+	min-width: 35px;
+}
+

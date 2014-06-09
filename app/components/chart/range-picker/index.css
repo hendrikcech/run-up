@@ -1,0 +1,28 @@
+.range-picker {
+	background-color: white;
+	width: 125px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 100%;
+}
+
+.range-picker__value {
+	/*margin: auto;*/
+	flex-grow: 2;
+	width: 100%;
+	text-align: center;
+}
+
+button:active.range-picker__button {
+	background-color: #ebebeb;
+	border-color: #adadad;
+	box-shadow: inset 0 3px 5px rgba(0,0,0,.125);
+}
+
+.range-picker__button:first-child {
+	border-right: 1px solid #eee;
+}
+.range-picker__button:last-child {
+	border-left: 1px solid #eee;
+}
