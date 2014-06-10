@@ -11,6 +11,7 @@
   "author": "Hendrik Cech",
   "license": "MIT",
   "dependencies": {
+    "chokidar": "^0.8.2",
     "fastclick": "^1.0.1",
     "gps-distance": "0.0.3",
     "leaflet": "^0.7.2",

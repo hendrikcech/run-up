@@ -9,7 +9,7 @@ var reactify = require('reactify')
 var exorcist = require('exorcist')
 var uglify = require('uglify-js').minify
 var concat = require('concat-stream')
-var Gaze = require('gaze').Gaze
+var chokidar = require('chokidar')
 
 var joinDir = path.join.bind(path, __dirname)
 var JS_IN = joinDir('/app/app.js')
@@ -25,7 +25,10 @@ var watch = process.argv[2] === '-w'
 /* process all the javascripts */
 var externals = ['react', 'leaflet', 'moment', 'fastclick', 'gps-distance']
 
-process.on('uncaughtException', function() { console.error('uncaught!') })
+process.on('uncaughtException', function(err) {
+	console.error('uncaught!')
+	console.error(err.stack)
+})
 
 // app code bundle
 var i = watch ? watchify : browserify
@@ -94,6 +97,13 @@ bundleCSS()
 
 if(watch) {
 	var g = __dirname + '/app/**/*.css'
-	var gaze = new Gaze(g)
-	gaze.on('all', bundleCSS)
+	var watcher = chokidar.watch('app', {
+		ignoreInitial: true,
+		ignored: function(file) {
+			var ext = path.extname(file)
+			return (ext === '.css' || ext === '') ? false : true
+		}
+	})
+	watcher.on('error', console.error.bind(console))
+	watcher.on('all', bundleCSS)
 }
