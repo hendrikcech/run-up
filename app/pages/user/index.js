@@ -45,17 +45,23 @@ module.exports = React.createClass({
 	getInitialState: function() {
 		return { data: data }
 	},
-	sortByDate: function(data) {
+	processData: function(data) {
 		return data.map(function(d) {
 			d.date = moment(d.date, 'DD.MM.YYYY')
+			d.week = Number(d.date.year() + '' + this.wlz(d.date.isoWeek()))
 			return d
-		}).sort(function(a, b) {
-			return b.date.unix() - a.date.unix()
-		})
+		}, this)
+	},
+	wlz: function(d) { // withLeadingZero
+		var str = d.toString()
+		if(str.length < 2) {
+			return '0' + str
+		}
+		return str
 	},
 	activitiesInWeek: function(data, week) {
 		return data.reduce(function(memo, d) {
-			if(d.date.isoWeek() === Number(week)) memo.push(d)
+			if(d.week == week) memo.push(d)
 			return memo
 		}, [])
 	},
@@ -64,71 +70,56 @@ module.exports = React.createClass({
 		return { year: Number(s[0]), week: Number(s[1]) }
 	},
 	render: function() {
-		var data = this.sortByDate(this.state.data)
+		// add week property for easy sorting; format: {year}{week} - 201424
+		var data = this.processData(this.state.data)
 
-		var weeks = {}
+		// group data points by weeks
+		var aweeks = {}
 		for(var i=0; i<data.length; i++) {
-			if(Object.keys(weeks).length === 7) break
-			var week = data[i].date.year() + '-' + data[i].date.isoWeek()
-			weeks[week] = true
+			if(Object.keys(aweeks).length === 8) break
+			aweeks[data[i].week] = true
 		}
 
-		weeks = Object.keys(weeks).sort(function(a, b) {
+		// sort weeks: newest first
+		var weeks = Object.keys(aweeks).sort(function(a, b) {
 			return b - a
 		})
 
-		var month = null
+		var current = {}
 		var Weeks = []
 		for(var i=0; i<weeks.length; i++) {
-			var split = this.split(weeks[i])
-			var week = split.week
-			var year = split.year
+			var m = moment(weeks[i], 'YYYYWW')
 			var afterHeader = false
 
-			if(i > 0) {
-				var prev = this.split(weeks[i-1])
-				if(prev.year < year) {
-					if(prev.week < 52) {
-						doIt()
-					}
-					if(week === 1) {
-						doIt()
-					}
-				} else {
-					if(prev.week - week > 1) {
-						doIt()
-					}
-				}
-			 	
-			 	function doIt() {
-					Weeks.push(<Fold />)
-					afterHeader = true
-				}
+			// at least one empty week between current and last one? insert fold
+			if(weeks[i-1] - weeks[i] > 1) {
+				Weeks.push(<Fold />)
+				afterHeader = true
 			}
-			if(moment(week, 'W').month() !== month) {
-				var m = moment(week, 'W')
-				month = m.month()
+
+			// is this week the first of a new month or year? insert header
+			if(m.month() !== current.month || m.year() !== current.year) {
+				current = { month: m.month(), year: m.year() }
 				var name = m.format('MMMM YYYY')
 				Weeks.push(<div className='calendar__week-header'><h2>{name}</h2></div>)
 				afterHeader = true
 			}
 
-			var activities = this.activitiesInWeek(data, week)
+			// add all activities in current week to object
+			// { weekday(number): activityobject }
+			var activities = this.activitiesInWeek(data, weeks[i])
 			var activeWeekDays = {}
 			activities.forEach(function(activity) {
 				activeWeekDays[activity.date.isoWeekday()] = activity
 			})
 
+			// add seven days to array
 			var days = []
 			for(var d=1; d<8; d++) {
 				days.push(<Day data={activeWeekDays[d]} />)
 			}
 
-			// var dayArray = [1, 2, 3, 4, 5, 6, 7]
-			// var days = dayArray.map(function(day) {
-				// return <Day data={activeWeekDays[activeWeekDays.indexOf(day)]} />
-			// })
-			console.log(activities, activeWeekDays, days)
+			// push current week to array
 			Weeks.push(<Week afterHeader={afterHeader}>{days}</Week>)
 		}
 
@@ -150,7 +141,6 @@ module.exports = React.createClass({
 var Day = React.createClass({
 	render: function() {
 		if(this.props.data) { // could be -1?
-			console.log(this.props.data)
 			var activeClass = 'calendar__day-active'
 			var label = this.props.data.date.format('DD.MM.YYYY')
 		}
