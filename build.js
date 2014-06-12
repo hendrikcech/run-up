@@ -6,6 +6,7 @@ var autoprefixer = require('autoprefixer')
 var browserify = require('browserify')
 var watchify = require('watchify')
 var reactify = require('reactify')
+var brfs = require('brfs')
 var exorcist = require('exorcist')
 var uglify = require('uglify-js').minify
 var concat = require('concat-stream')
@@ -19,22 +20,38 @@ var HIGHCHARTS_IN = joinDir('/app/vendor/highcharts-custom.js')
 var HIGHCHARTS_OUT = joinDir('/dist/highcharts-custom.js')
 var CSS_IN = joinDir('/app/style.css')
 var CSS_OUT = joinDir('/dist/bundle.css')
+var DATA_IN = joinDir('/app/data')
+var DATA_OUT = joinDir('/dist/data.js')
 
 var watch = process.argv[2] === '-w'
-
-/* process all the javascripts */
-var externals = ['react', 'leaflet', 'moment', 'fastclick', 'gps-distance']
 
 process.on('uncaughtException', function(err) {
 	console.error('uncaught!')
 	console.error(err.stack)
+	process.exit(1)
 })
+
+/* process all the javascripts */
+var externals = ['react', 'leaflet', 'moment', 'fastclick', 'gps-distance']
+
+var data = fs.readdirSync(DATA_IN).map(function(file) {
+	return path.join(DATA_IN, file)
+})
+
+var d = browserify()
+	.require(data)
+	.bundle()
+	.on('error', console.error.bind(console))
+
+minify(DATA_OUT, d)
 
 // app code bundle
 var i = watch ? watchify : browserify
 var b = i(JS_IN)
 	.external(externals)
+	.external(data)
 	.transform(reactify)
+	.transform(brfs)
 	.on('error', console.error.bind(console))
 	.on('update', bundleJS)
 

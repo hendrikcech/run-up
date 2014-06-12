@@ -9,6 +9,14 @@ var Map = require('../../components/map')
 
 module.exports = React.createClass({
 	displayName: 'run',
+	propTypes: {
+		data: React.PropTypes.object.isRequired,
+		profiles: React.PropTypes.object.isRequired,
+		params: React.PropTypes.shape({
+			entity: React.PropTypes.string,
+			id: React.PropTypes.string
+		}).isRequired
+	},
 	getInitialState: function() {
 		return { selection: [] }
 	},
@@ -17,8 +25,9 @@ module.exports = React.createClass({
 	},
 
 	render: function() {
-		var profile = this.props.profile
-		var data = this.props.data
+		var params = this.props.params
+		var data = this.props.data[params.entity][params.id]
+		var profile = this.props.profiles[params.entity]
 		var distance = WTZ(Math.round(data.distance / 1000 * 100) / 100)
 		var duration = moment.duration(data.duration, 'milliseconds')
 		var pace = moment.duration(data.pace.avg, 'milliseconds')
@@ -31,8 +40,8 @@ module.exports = React.createClass({
 					<Item key='Pace' value={WLZ(pace.minutes()) +':'+ WLZ(pace.seconds())} />
 					<Item key='Heart Rate' value={hr} />
 				</Panel>
-				<Map className='panel' data={this.props.data} selection={this.state.selection} />
-				<Chart className='panel' data={this.props.data} onSelectionChange={this.changeSelection} />
+				<Map className='panel' data={data} selection={this.state.selection} />
+				<Chart className='panel' data={data} onSelectionChange={this.changeSelection} />
 			</div>
 		)
 	}

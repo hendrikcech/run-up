@@ -38,6 +38,7 @@
 .calendar__day-active {
 	background-color: steelblue;
 	color: white;
+	cursor: pointer;
 }
 
 .calendar__fold {
@@ -50,7 +51,8 @@
 }
 
 .calendar__fold-item {
-	height: 24px;
+	height: 18px;
+	/*height: 24px;*/
 	width: 702px;
 	width: calc(100% - 18px);
 	position: relative;
@@ -61,17 +63,22 @@
 .calendar__fold-side {
 	height: 35px;
 	width: 100%;
+	border-right: 1px solid rgba(155, 155, 155, 0.67);
+	border-left: 1px solid rgba(155, 155, 155, 0.67);
 	/*background: rgb(209, 209, 209);*/
 }
 
 .calendar__fold-top {
-	transform: rotateX(290deg);
+	transform: rotateX(285deg);
+	/*transform: rotateX(290deg);*/
 	transform-origin: top;
-	border-bottom: 2px solid rgba(155, 155, 155, 0.67);
+	border-bottom: 3px solid rgba(155, 155, 155, 0.67);
+	/*border-bottom: 2px solid rgba(155, 155, 155, 0.67);*/
 	background: linear-gradient(rgb(228, 228, 228), rgb(209, 209, 209));
 }
 .calendar__fold-bottom {
 	transform: rotateX(70deg);
+	transform: rotateX(75deg);
 	transform-origin: bottom;
 	position: absolute;
 	bottom: 0;

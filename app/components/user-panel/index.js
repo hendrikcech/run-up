@@ -14,7 +14,7 @@ exports.Panel = React.createClass({
 		var props = this.props
 		var classes = this.props.className ? [this.props.className] : []
 		classes.push('user-panel')
-		var time = props.time ? moment(props.time).calendar() : ''
+		var time = props.time ? moment(props.time).format('DD.MM.YYYY') : ''
 		return (
 			<div className={classes.join(' ')}>
 				<div className='user-panel__top'>

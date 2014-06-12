@@ -74,14 +74,15 @@ module.exports = React.createClass({
 		this.setState({ dataType: type })
 	},
 	onSelectionChange: function(e, nextTick) {
-		if(!nextTick) {
-			return process.nextTick(this.onSelectionChange.bind(null, e, true))
-		}
+		/* potential performance impact */
+		// if(!nextTick) {
+		// 	return process.nextTick(this.onSelectionChange.bind(null, e, true))
+		// }
 
-		var selected = this.state.chart.getSelectedPoints().map(function(point) {
-			return [point.x, this.state.range]
-		}, this)
-
+		// var selected = this.state.chart.getSelectedPoints().map(function(point) {
+		// 	return [point.x, this.state.range]
+		// }, this)
+		var selected = []
 		if(e.type === 'mouseOver') {
 			if(this.state.supportsTouch) { // touch screen?
 				var selected = []

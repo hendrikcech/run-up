@@ -12,6 +12,7 @@
   "license": "MIT",
   "dependencies": {
     "chokidar": "^0.8.2",
+    "cortexjs": "^0.6.0",
     "fastclick": "^1.0.1",
     "gps-distance": "0.0.3",
     "leaflet": "^0.7.2",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^1.1.20140512",
+    "brfs": "^1.1.1",
     "browserify": "^4.1.4",
     "concat-stream": "^1.4.6",
     "envify": "^1.2.1",

@@ -14,6 +14,10 @@ module.exports = React.createClass({
 			selection: L.multiPolyline([], { color: 'red' })
 		}
 	},
+	componentWillMount: function() {
+		var data = this.props.data
+		this.state.route.setLatLngs(data.getCoordinates(data.points, true))
+	},
 	componentDidMount: function() {
 		var state = this.state
 		state.map = L.map('map')
@@ -42,8 +46,6 @@ module.exports = React.createClass({
 
 	render: function() {
 		var state = this.state
-		var data = this.props.data
-		state.route.setLatLngs(data.getCoordinates(data.points, true))
 		state.selection.setLatLngs(this.selectSegment())
 		return (
 			<div id='map' />
