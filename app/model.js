@@ -2,7 +2,7 @@ var gpsDistance = require('gps-distance')
 
 module.exports = Model
 function Model(json) {
-	var start = performance.now()
+	// var start = performance.now()
 
 	this.name = json.name || 'Random Run'
 	this.points = processPoints(json.points)
@@ -24,7 +24,7 @@ function Model(json) {
 		max: Math.max.apply(null, pace)
 	}
 	
-	console.log(performance.now() - start)
+	// console.log(performance.now() - start)
 }
 
 Model.prototype.getDuration = function(points) {

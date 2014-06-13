@@ -129,13 +129,16 @@ var Day = React.createClass({
 		Router.transitionTo('run', { entity: this.props.entity, id: this.props.id })
 	},
 	render: function() {
-		if(this.props.id) {
-			var activeClass = 'calendar__day-active'
+		if(this.props.empty) {
+			var modClass = 'calendar__day-empty'
 		}
-		var label = this.props.date.format('DD')
+		if(this.props.id) {
+			var modClass = 'calendar__day-active'
+		}
+		var label = this.props.date ? this.props.date.format('DD') : ''
 		return (
-			<div className={'calendar__day '+ (activeClass || '')} onClick={this.onClick}>
-				{label || 'No date'}
+			<div className={'calendar__day '+ (modClass || '')} onClick={this.onClick}>
+				{label}
 			</div>
 		)
 	}
@@ -155,12 +158,24 @@ var Week = React.createClass({
 })
 
 var Fold = React.createClass({
+	getWeek: function() {
+		var days = []
+		for(var d = 1; d < 8; d++) {
+			var day = 
+			days.push(<Day empty={true} />)
+		}
+		return days
+	},
 	render: function() {
 		return (
 			<div className='calendar__fold'>
 				<div className='calendar__fold-item'>
-					<div className='calendar__fold-side calendar__fold-top'></div>
-					<div className='calendar__fold-side calendar__fold-bottom'></div>
+					<div className='calendar__fold-side calendar__fold-top calendar__weeks-items'>
+						{this.getWeek()}
+					</div>
+					<div className='calendar__fold-side calendar__fold-bottom calendar__weeks-items'>
+						{this.getWeek()}
+					</div>
 				</div>
 			</div>
 		)
