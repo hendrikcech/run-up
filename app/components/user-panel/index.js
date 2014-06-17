@@ -19,7 +19,7 @@ exports.Panel = React.createClass({
 			<div className={classes.join(' ')}>
 				<div className='user-panel__top'>
 					<div className='user-panel__avatar'>
-						<img className='user-panel__avatar-img' src={props.avatar} />
+						<img className='user-panel__avatar-img' src={props.avatar} height={100} width={100} />
 					</div>
 					<div className='user-panel__list'>
 						<h1 className='user-panel__name'>{props.name}</h1>
