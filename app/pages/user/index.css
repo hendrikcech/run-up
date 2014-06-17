@@ -1,8 +1,4 @@
 .calendar__week {
-	/*display: flex;*/
-/*	max-height: 140px;
-	min-height: 60px;
-	height: 10 0px;*/
 	border-bottom: 1px solid #eee;
 }
 .calendar__week:last-child {
@@ -15,7 +11,7 @@
 
 .calendar__week-header {
 	text-align: center;
-	padding: 5px 0;
+	padding: 10px 0 5px 0;
 }
 .calendar__week-header > h2 {
 	margin: 0;
@@ -28,8 +24,13 @@
 .calendar__day {
 	flex-grow: 1;
 	border-right: 1px solid #eee;
-	padding: 5px 0 calc(14% - 21px) 5px; /* hack for quadratic divs */
+	padding: 6px 0 0 6px;
 	z-index: 1;
+}
+.calendar__day:after { /* hack for quadratic divs */
+	content: '';
+	display: block;
+	margin-top: calc(100% - 16px);
 }
 .calendar__day:last-child {
 	border-right: 0;
