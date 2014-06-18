@@ -1,8 +1,10 @@
 var gpsDistance = require('gps-distance')
 
-module.exports = Model
-function Model(json) {
-	// var start = performance.now()
+module.exports = Run
+var a = typeof performance !== 'undefined'
+global.perf = []
+function Run(json) {
+	if(a) var start = performance.now()
 
 	this.name = json.name || 'Random Run'
 	this.points = processPoints(json.points)
@@ -24,22 +26,22 @@ function Model(json) {
 		max: Math.max.apply(null, pace)
 	}
 	
-	// console.log(performance.now() - start)
+	if(a) global.perf.push(performance.now() - start)
 }
 
-Model.prototype.getDuration = function(points) {
+Run.prototype.getDuration = function(points) {
 	return points.reduce(function(memo, point) {
 		return memo + point.time
 	}, 0)
 }
 
-Model.prototype.getDistance = function(points) {
+Run.prototype.getDistance = function(points) {
 	return points.reduce(function(memo, point) {
 		return memo + point.distance
 	}, 0)
 }
 
-Model.prototype.getSegment = function(boundaries) { // both in m
+Run.prototype.getSegment = function(boundaries) { // both in m
 	var start = boundaries[0]
 	var length = boundaries[1]
 	var points = []
@@ -50,14 +52,14 @@ Model.prototype.getSegment = function(boundaries) { // both in m
 	return points
 }
 
-Model.prototype.getHR = function(points) {
+Run.prototype.getHR = function(points) {
 	var total = points.reduce(function(memo, point) {
 		return memo + point.hr
 	}, 0)
 	return Math.round(total / points.length)
 }
 
-Model.prototype.getPace = function(points) {
+Run.prototype.getPace = function(points) {
 	var vals = points.reduce(function(memo, point) {
 		return {
 			distance: memo.distance + point.distance,
@@ -67,7 +69,7 @@ Model.prototype.getPace = function(points) {
 	return calcPace(vals.distance, vals.time)
 }
 
-Model.prototype.getCoordinates = function(points, latlng) {
+Run.prototype.getCoordinates = function(points, latlng) {
 	return points.map(function(point) {
 		if(!latlng) return point.coordinates
 		else return [point.coordinates[1], point.coordinates[0], point.coordinates[2]]

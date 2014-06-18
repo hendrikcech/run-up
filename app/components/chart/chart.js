@@ -4,7 +4,7 @@ module.exports = function(target, onSelectionChange, dataType, hr, pace) {
 	return new Highcharts.Chart({
 		chart: {
 			renderTo: target,
-			type: 'column',
+			type: 'column'
 		},
 		title: { text: '' },
 		tooltip: {
@@ -20,7 +20,6 @@ module.exports = function(target, onSelectionChange, dataType, hr, pace) {
 			}
 		},
 		colors: ['#7cb5ec'],
-		animation: false,
 		credits: { enabled: false },
 		xAxis: {},
 		yAxis: [{
@@ -44,14 +43,14 @@ module.exports = function(target, onSelectionChange, dataType, hr, pace) {
 			enabled: false
 		},
 		plotOptions: {
-			animation: false,
 			column: {
 				pointPadding: null,
 				groupPadding: null,
 				borderWidth: 1,
 				borderColor: 'white',
 				allowPointSelect: true,
-				pointPlacement: 'between'
+				pointPlacement: 'between',
+				animation: false
 			},
 			series: {
 				cursor: 'pointer',

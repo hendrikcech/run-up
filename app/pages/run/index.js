@@ -1,6 +1,7 @@
 /** @jsx React.DOM */
 var React = require('react')
 var moment = require('moment')
+var Run = require('../../data/run')
 var UserPanel = require('../../components/user-panel')
 var Panel = UserPanel.Panel
 var Item = UserPanel.Item
@@ -10,8 +11,8 @@ var Map = require('../../components/map')
 module.exports = React.createClass({
 	displayName: 'run',
 	propTypes: {
-		data: React.PropTypes.object.isRequired,
-		profiles: React.PropTypes.object.isRequired,
+		getRun: React.PropTypes.func.isRequired,
+		getProfile: React.PropTypes.func.isRequired,
 		params: React.PropTypes.shape({
 			entity: React.PropTypes.string,
 			id: React.PropTypes.string
@@ -26,22 +27,23 @@ module.exports = React.createClass({
 
 	render: function() {
 		var params = this.props.params
-		var data = this.props.data[params.entity][params.id]
-		var profile = this.props.profiles[params.entity]
-		var distance = WTZ(Math.round(data.distance / 1000 * 100) / 100)
-		var duration = moment.duration(data.duration, 'milliseconds')
-		var pace = moment.duration(data.pace.avg, 'milliseconds')
-		var hr = Math.round(data.hr.avg)
+		var data = this.props.getRun(params.entity, params.id)
+		var run = new Run(data)
+		var profile = this.props.getProfile(params.entity)
+		var distance = WTZ(Math.round(run.distance / 1000 * 100) / 100)
+		var duration = moment.duration(run.duration, 'milliseconds')
+		var pace = moment.duration(run.pace.avg, 'milliseconds')
+		var hr = Math.round(run.hr.avg)
 		return (
 			<div>
-				<Panel className='panel' avatar={profile.avatar} name={data.name} time={data.startTime}>
+				<Panel className='panel' avatar={profile.avatar} name={run.name} time={run.startTime}>
 					<Item key='Distance' value={distance} />
 					<Item key='Duration' value={WLZ(duration.asMinutes()) +':'+ WLZ(duration.seconds())} />
 					<Item key='Pace' value={WLZ(pace.minutes()) +':'+ WLZ(pace.seconds())} />
 					<Item key='Heart Rate' value={hr} />
 				</Panel>
-				<Map className='panel' data={data} selection={this.state.selection} />
-				<Chart className='panel' data={data} onSelectionChange={this.changeSelection} />
+				<Map className='panel' data={run} selection={this.state.selection} />
+				<Chart className='panel' data={run} onSelectionChange={this.changeSelection} />
 			</div>
 		)
 	}
